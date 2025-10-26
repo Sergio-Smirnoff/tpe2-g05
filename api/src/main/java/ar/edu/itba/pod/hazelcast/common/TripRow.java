@@ -17,6 +17,8 @@ public class TripRow implements DataSerializable {
     private double trip_miles;
     private double base_fare;
 
+    public TripRow(){}
+
     public TripRow(
             String company,
             LocalDateTime request_time,

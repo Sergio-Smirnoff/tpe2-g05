@@ -12,6 +12,8 @@ public class ZonesRow implements DataSerializable {
     private String Borogh;
     private String Zone;
 
+    public ZonesRow(){}
+
     public ZonesRow(int locationID, String borogh, String zone) {
         LocationID = locationID;
         Borogh = borogh;
