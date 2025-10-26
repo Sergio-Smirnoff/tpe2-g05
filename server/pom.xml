@@ -14,6 +14,11 @@
           <groupId>com.hazelcast</groupId>
           <artifactId>hazelcast-all</artifactId>
       </dependency>
+    <dependency>
+      <groupId>ar.edu.itba.pod.hazelcast</groupId>
+      <artifactId>tpe2-g05-api</artifactId>
+      <version>2025.2Q</version>
+    </dependency>
   </dependencies>
   <build>
     <testSourceDirectory>src/test/java</testSourceDirectory>
