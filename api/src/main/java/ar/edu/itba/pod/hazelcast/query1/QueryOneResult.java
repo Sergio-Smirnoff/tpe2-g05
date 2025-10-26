@@ -34,4 +34,5 @@ public class QueryOneResult {
     public String toCsvLine() {
         return startZone + ";" + endZone + ";" + count;
     }
+
 }

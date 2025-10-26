@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -102,10 +103,12 @@ public class ClientQuery1 {
 
             // Process Data
             Map<StartEndPair, Long> result = future.get();
+
+            Map<Integer, ZonesRow> localZonesMap = new HashMap<>(zonesMap);
             SortedSet<QueryOneResult> finalResults = new TreeSet<>(QueryOneResult.getComparator());
             for(Map.Entry<StartEndPair, Long> entry: result.entrySet()) {
-                String startZone = zonesMap.get(entry.getKey().getStartZone()).getZone();
-                String endZone = zonesMap.get(entry.getKey().getEndZone()).getZone();
+                String startZone = localZonesMap.get(entry.getKey().getStartZone()).getZone();
+                String endZone = localZonesMap.get(entry.getKey().getEndZone()).getZone();
                 Long count = entry.getValue();
                 finalResults.add(new QueryOneResult(startZone, endZone, count));
             }
