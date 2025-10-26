@@ -1,8 +1,13 @@
 package ar.edu.itba.pod.hazelcast.common;
 
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.DataSerializable;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class TripRow {
+public class TripRow implements DataSerializable {
     private String company;
     private LocalDateTime request_time;
     private LocalDateTime pickup_time;
@@ -62,5 +67,29 @@ public class TripRow {
 
     public double getBase_fare() {
         return base_fare;
+    }
+
+    @Override
+    public void writeData(ObjectDataOutput out) throws IOException {
+        out.writeUTF(company);
+        out.writeObject(request_time);
+        out.writeObject(pickup_time);
+        out.writeObject(dropoff_time);
+        out.writeInt(PULocationID);
+        out.writeInt(DOLocationID);
+        out.writeDouble(trip_miles);
+        out.writeDouble(base_fare);
+    }
+
+    @Override
+    public void readData(ObjectDataInput in) throws IOException {
+        company = in.readUTF();
+        request_time = in.readObject();
+        pickup_time = in.readObject();
+        dropoff_time = in.readObject();
+        PULocationID = in.readInt();
+        DOLocationID = in.readInt();
+        trip_miles = in.readDouble();
+        base_fare = in.readDouble();
     }
 }
