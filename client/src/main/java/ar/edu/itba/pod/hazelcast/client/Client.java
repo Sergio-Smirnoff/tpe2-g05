@@ -68,14 +68,16 @@ public class Client {
                                 Integer.parseInt(line[5]),
                                 Double.parseDouble(line[6]),
                                 Double.parseDouble(line[7])
-                                ))
+                        ))
                         .forEach(trip -> tripMultiMap.put(trip.getPULocationID(), trip));
             }
 
             // Ejercicio 2.1
             // Check how many objects where loaded
             System.out.println(tripMultiMap.size());
-        } finally {
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }finally {
             HazelcastClient.shutdownAll();
         }
     }
