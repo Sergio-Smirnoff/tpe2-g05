@@ -39,6 +39,10 @@ public class ClientQuery3 {
         logger.info("tpe2-g05 Client Starting ...");
         logger.info("grpc-com-patterns Client Starting ...");
         try {
+
+            BufferedWriter timesLogger = Files.newBufferedWriter(Path.of("client/src/main/assembly/times.txt"), StandardCharsets.UTF_8);
+
+            timesLogger.write("### Times of Query 3 ###\n");
             // Group Config
             GroupConfig groupConfig = new GroupConfig().setName("g05-hazelcast").setPassword("g05-hazelcast-pass");
 
@@ -51,6 +55,7 @@ public class ClientQuery3 {
 
             // Node Client
             HazelcastInstance hazelcastInstance = HazelcastClient.newHazelcastClient(clientConfig);
+            timesLogger.write(String.format("Start Data Loading: %s \n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
 
             // Read from csv file and loads maps
             IMap<Integer, ZonesRow> zonesMap = hazelcastInstance.getMap("zones");                       // key is the zones id
@@ -60,7 +65,7 @@ public class ClientQuery3 {
 
             final AtomicInteger tripsMapKey = new AtomicInteger();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/trips-2025-01.csv"), StandardCharsets.UTF_8)) {
                 lines.skip(1)
                         .map(line -> line.split(";"))
                         .map(line -> new TripRow(
@@ -76,7 +81,7 @@ public class ClientQuery3 {
                         .forEach(trip -> tripsMap.put(tripsMapKey.getAndIncrement(), trip));
             }
 
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/zones.csv"), StandardCharsets.UTF_8)) {
+            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/zones.csv"), StandardCharsets.UTF_8)) {
                 lines.skip(1)
                         .map(line -> line.split(";"))
                         .map(line -> new ZonesRow(
@@ -86,6 +91,10 @@ public class ClientQuery3 {
                         ))
                         .forEach(zone -> zonesMap.put(zone.getLocationID(), zone));
             }
+
+            timesLogger.write(String.format("End Data Loading: %s\n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            timesLogger.write(String.format("Start Data Querying: %s\n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+
 
             // ======================== Query ==========================
             JobTracker jobTracker = hazelcastInstance.getJobTracker("avgPriceByZoneAndComp");
@@ -99,10 +108,10 @@ public class ClientQuery3 {
                     .submit(new Query3Collator());
 
             // Process Data
-            Map<PickupCompanyPair, Double> result = future.get();
+            List<Map.Entry<PickupCompanyPair, Double>> result = future.get();
 
             List<AvgPriceBoroughCompany> toReturn = new ArrayList<>();
-            for(Map.Entry<PickupCompanyPair, Double> entry: result.entrySet()) {
+            for (Map.Entry<PickupCompanyPair, Double> entry : result) {
                 toReturn.add(new AvgPriceBoroughCompany(entry.getKey().getPULocation(), entry.getKey().getCompany(), entry.getValue()));
             }
 
@@ -122,9 +131,12 @@ public class ClientQuery3 {
                 }
 
             }
+            timesLogger.write(String.format("End Data Querying: %s\n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            timesLogger.close();
             // ======================== End Query =======================
 
-
+        } catch( Exception e){
+            logger.error(e.getLocalizedMessage());
         }finally {
             HazelcastClient.shutdownAll();
         }
