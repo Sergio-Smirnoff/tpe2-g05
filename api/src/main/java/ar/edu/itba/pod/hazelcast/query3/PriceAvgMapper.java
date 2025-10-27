@@ -8,17 +8,12 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 public class PriceAvgMapper implements Mapper<Integer, TripRow, PickupCompanyPair, Double>, HazelcastInstanceAware {
-    private transient HashMap<Integer, ZonesRow> localZoneIds;
+    private transient IMap<Integer, ZonesRow> zonesMap;
 
     @Override
     public void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
-        IMap<Integer, ZonesRow> zonesMap = hazelcastInstance.getMap("zones");
-        this.localZoneIds = new HashMap<>(zonesMap); // CLiente o no? Tengo que traer los nombres para ponerlo en el PAIR?
+        this.zonesMap = hazelcastInstance.getMap("zones");
     }
 
     @Override
@@ -26,9 +21,11 @@ public class PriceAvgMapper implements Mapper<Integer, TripRow, PickupCompanyPai
         int PULocationID = tripRow.getPULocationID();
         String company = tripRow.getCompany();
 
-        if ( localZoneIds.get(PULocationID) != null  ){
-            String pickupLocation = localZoneIds.get(PULocationID).getBorogh();
-            context.emit(new PickupCompanyPair(pickupLocation, company),tripRow.getBase_fare());
+        ZonesRow zone = zonesMap.get(PULocationID);
+
+        if (zone != null) {
+            String pickupBorough = zone.getBorogh(); // Usar getBorogh()
+            context.emit(new PickupCompanyPair(pickupBorough, company), tripRow.getBase_fare());
         }
     }
 }
