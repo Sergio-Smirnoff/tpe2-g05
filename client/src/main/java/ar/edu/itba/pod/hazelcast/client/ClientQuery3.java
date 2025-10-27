@@ -1,7 +1,7 @@
 package ar.edu.itba.pod.hazelcast.client;
 
 
-
+/*
 import ar.edu.itba.pod.hazelcast.query1.QueryOneResult;
 import ar.edu.itba.pod.hazelcast.query1.StartEndPair;
 import ar.edu.itba.pod.hazelcast.query3.*;
@@ -130,3 +130,4 @@ public class ClientQuery3 {
         }
     }
 }
+*/
