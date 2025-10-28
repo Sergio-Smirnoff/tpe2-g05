@@ -30,7 +30,8 @@ public class QueryOneTest {
 
             try (Statement stmt = h2Connection.createStatement()) {
 
-                URL tripsUrl = QueryOneTest.class.getResource("/trips-2025-01-mini.csv");
+                String tripsResourcePath = "/trips-2025-01-mini-400000.csv";
+                URL tripsUrl = QueryOneTest.class.getResource(tripsResourcePath);
                 URL zonesUrl = QueryOneTest.class.getResource("/zones.csv");
 
                 if (tripsUrl == null || zonesUrl == null) {

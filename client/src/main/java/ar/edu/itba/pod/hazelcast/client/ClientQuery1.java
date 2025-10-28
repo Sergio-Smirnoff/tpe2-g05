@@ -43,6 +43,9 @@ public class ClientQuery1 {
         logger.info("Query 1 Client Starting ...");
 
         try {
+            BufferedWriter timesLogger = Files.newBufferedWriter(Path.of("client/src/main/assembly/times-query-one.txt"), StandardCharsets.UTF_8);
+            timesLogger.write("### Times of Query 1 ###\n");
+
             // Group Config
             GroupConfig groupConfig = new GroupConfig().setName("g05-hazelcast").setPassword("g05-hazelcast-pass");
 
@@ -67,7 +70,8 @@ public class ClientQuery1 {
 
             final AtomicInteger tripsMapKey = new AtomicInteger();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+            timesLogger.write("[INFO] Start Data Loading: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/trips-2025-01-mini-400000.csv"), StandardCharsets.UTF_8)) {
                 lines.skip(1)
                         .map(line -> line.split(";"))
                         .map(line -> new TripRow(
@@ -94,7 +98,10 @@ public class ClientQuery1 {
                         .forEach(zone -> zonesMap.put(zone.getLocationID(), zone));
             }
 
+            timesLogger.write("[INFO] End Data Loading: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+
             // Map Reduce Job
+            timesLogger.write("[INFO] Start Map Reduce Job: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
             Job<Integer, TripRow> job = jobTracker.newJob(tripsKeyValueSource);
             ICompletableFuture<Map<StartEndPair, Long>> future = job
                     .mapper(new StartEndPairMapper())
@@ -103,6 +110,7 @@ public class ClientQuery1 {
 
             // Process Data
             Map<StartEndPair, Long> result = future.get();
+            timesLogger.write("[INFO] End Map Reduce Job: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
             Map<Integer, ZonesRow> localZonesMap = new HashMap<>(zonesMap);
             SortedSet<QueryOneResult> finalResults = new TreeSet<>(QueryOneResult.getComparator());
@@ -129,6 +137,7 @@ public class ClientQuery1 {
                 }
 
             }
+            timesLogger.close();
 
             // Check items loaded
             //System.out.printf("trip map size (small) : %d", tripsMap.size());
