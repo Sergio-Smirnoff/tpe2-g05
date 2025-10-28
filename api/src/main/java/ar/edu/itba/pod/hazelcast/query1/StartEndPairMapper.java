@@ -11,6 +11,7 @@ import com.hazelcast.mapreduce.Mapper;
 import java.util.HashSet;
 import java.util.Set;
 
+
 public class StartEndPairMapper implements Mapper<Integer, TripRow, StartEndPair, Long>, HazelcastInstanceAware {
     private static final Long ONE = 1L;
     private transient Set<Integer> localZoneIds;
