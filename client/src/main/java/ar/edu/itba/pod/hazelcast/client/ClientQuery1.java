@@ -2,10 +2,7 @@ package ar.edu.itba.pod.hazelcast.client;
 
 import ar.edu.itba.pod.hazelcast.common.TripRow;
 import ar.edu.itba.pod.hazelcast.common.ZonesRow;
-import ar.edu.itba.pod.hazelcast.query1.QueryOneResult;
-import ar.edu.itba.pod.hazelcast.query1.StartEndPair;
-import ar.edu.itba.pod.hazelcast.query1.StartEndPairMapper;
-import ar.edu.itba.pod.hazelcast.query1.StartEndPairReducerFactory;
+import ar.edu.itba.pod.hazelcast.query1.*;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
@@ -103,23 +100,14 @@ public class ClientQuery1 {
             // Map Reduce Job
             timesLogger.write("[INFO] Start Map Reduce Job: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
             Job<Integer, TripRow> job = jobTracker.newJob(tripsKeyValueSource);
-            ICompletableFuture<Map<StartEndPair, Long>> future = job
+            ICompletableFuture<SortedSet<QueryOneResult>> future = job
                     .mapper(new StartEndPairMapper())
                     .reducer(new StartEndPairReducerFactory())
-                    .submit();
+                    .submit(new QueryOneCollator(zonesMap));
 
             // Process Data
-            Map<StartEndPair, Long> result = future.get();
+            SortedSet<QueryOneResult> results = future.get();
             timesLogger.write("[INFO] End Map Reduce Job: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-
-            Map<Integer, ZonesRow> localZonesMap = new HashMap<>(zonesMap);
-            SortedSet<QueryOneResult> finalResults = new TreeSet<>(QueryOneResult.getComparator());
-            for(Map.Entry<StartEndPair, Long> entry: result.entrySet()) {
-                String startZone = localZonesMap.get(entry.getKey().getStartZone()).getZone();
-                String endZone = localZonesMap.get(entry.getKey().getEndZone()).getZone();
-                Long count = entry.getValue();
-                finalResults.add(new QueryOneResult(startZone, endZone, count));
-            }
 
             // Write Data
             String path = "client/src/main/assembly/query1.csv";
@@ -132,8 +120,8 @@ public class ClientQuery1 {
                 printWriter.println("pickUpZone;dropOffZone;trips");
 
                 // Loop through results and write each line
-                for (QueryOneResult resultLine : finalResults) {
-                    printWriter.println(resultLine.toCsvLine());
+                for (QueryOneResult resultLine : results) {
+                    printWriter.println(resultLine.toString());
                 }
 
             }
