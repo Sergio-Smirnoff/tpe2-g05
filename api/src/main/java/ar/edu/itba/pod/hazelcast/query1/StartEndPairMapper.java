@@ -8,23 +8,27 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class StartEndPairMapper implements Mapper<Integer, TripRow, StartEndPair, Long>, HazelcastInstanceAware {
     private static final Long ONE = 1L;
-    private transient IMap<Integer, ZonesRow> zonesMap;
+    private transient Set<Integer> localZoneIds;
 
     @Override
     public void map(Integer integer, TripRow tripRow, Context<StartEndPair, Long> context) {
         int PULocationId = tripRow.getPULocationID();
         int DOLocationId = tripRow.getDOLocationID();
 
-        if(zonesMap.containsKey(PULocationId) && zonesMap.containsKey(DOLocationId) && PULocationId != DOLocationId) {
+        if(localZoneIds.contains(PULocationId) && localZoneIds.contains(DOLocationId) && PULocationId != DOLocationId) {
             context.emit(new StartEndPair(PULocationId, DOLocationId), ONE);
         }
     }
 
     @Override
     public void setHazelcastInstance(HazelcastInstance hazelcastInstance){
-        this.zonesMap = hazelcastInstance.getMap("zones");
+        IMap<Integer, ZonesRow> zonesMap = hazelcastInstance.getMap("zones");
+        this.localZoneIds = new HashSet<>(zonesMap.keySet());
     }
 }

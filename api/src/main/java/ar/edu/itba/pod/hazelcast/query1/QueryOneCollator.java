@@ -6,10 +6,7 @@ import com.hazelcast.core.HazelcastInstanceAware;
 import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Collator;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public class QueryOneCollator implements Collator<Map.Entry<StartEndPair, Long>, SortedSet<QueryOneResult>> {
 
@@ -21,6 +18,8 @@ public class QueryOneCollator implements Collator<Map.Entry<StartEndPair, Long>,
 
     @Override
     public SortedSet<QueryOneResult> collate(Iterable<Map.Entry<StartEndPair, Long>> iterable) {
+        Map<Integer, ZonesRow> localZonesMap = new HashMap<>(this.zonesMap);
+
         SortedSet<QueryOneResult> toReturn = new TreeSet<>(
                 Comparator.comparing(QueryOneResult::count).reversed()
                         .thenComparing(QueryOneResult::startZone)
@@ -28,8 +27,8 @@ public class QueryOneCollator implements Collator<Map.Entry<StartEndPair, Long>,
         );
 
         for (Map.Entry<StartEndPair, Long> entry : iterable) {
-            String startZone = zonesMap.get(entry.getKey().getStartZone()).getZone();
-            String endZone = zonesMap.get(entry.getKey().getEndZone()).getZone();
+            String startZone = localZonesMap.get(entry.getKey().getStartZone()).getZone();
+            String endZone = localZonesMap.get(entry.getKey().getEndZone()).getZone();
             toReturn.add(new QueryOneResult(
                     startZone,
                     endZone,
