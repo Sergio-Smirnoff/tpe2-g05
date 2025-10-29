@@ -2,23 +2,14 @@ package ar.edu.itba.pod.hazelcast.query1;
 
 import ar.edu.itba.pod.hazelcast.common.QueryOneFourResult;
 import ar.edu.itba.pod.hazelcast.common.Pair;
-import ar.edu.itba.pod.hazelcast.common.ZonesRow;
-import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Collator;
 
 import java.util.*;
 
-public class QueryOneCollator implements Collator<Map.Entry<Pair<Integer, Integer>, Long>, SortedSet<QueryOneFourResult>> {
-
-    private IMap<Integer, ZonesRow> zonesMap;
-
-    public QueryOneCollator(IMap<Integer, ZonesRow> zonesMap) {
-        this.zonesMap = zonesMap;
-    }
+public class QueryOneCollator implements Collator<Map.Entry<Pair<String, String>, Long>, SortedSet<QueryOneFourResult>> {
 
     @Override
-    public SortedSet<QueryOneFourResult> collate(Iterable<Map.Entry<Pair<Integer, Integer>, Long>> iterable) {
-        Map<Integer, ZonesRow> localZonesMap = new HashMap<>(this.zonesMap);
+    public SortedSet<QueryOneFourResult> collate(Iterable<Map.Entry<Pair<String, String>, Long>> iterable) {
 
         SortedSet<QueryOneFourResult> toReturn = new TreeSet<>(
                 Comparator.comparing(QueryOneFourResult::amount).reversed()
@@ -26,12 +17,10 @@ public class QueryOneCollator implements Collator<Map.Entry<Pair<Integer, Intege
                         .thenComparing(QueryOneFourResult::endZone)
         );
 
-        for (Map.Entry<Pair<Integer, Integer>, Long> entry : iterable) {
-            String startZone = localZonesMap.get(entry.getKey().getLeft()).getZone();
-            String endZone = localZonesMap.get(entry.getKey().getRight()).getZone();
+        for (Map.Entry<Pair<String, String>, Long> entry : iterable) {
             toReturn.add(new QueryOneFourResult(
-                    startZone,
-                    endZone,
+                    entry.getKey().getLeft(),
+                    entry.getKey().getRight(),
                     entry.getValue()
             ));
         }

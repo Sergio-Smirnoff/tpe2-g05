@@ -14,8 +14,6 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -26,110 +24,95 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ClientQuery1 {
-    private static final Logger logger = LoggerFactory.getLogger(Client.class);
+public class ClientQuery1 extends Client{
 
-    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+    public ClientQuery1(final String address, final String inPath, final String outPath){
+        super(address, inPath, outPath);
+        super.initializeHazelcast();
+    }
+
+    @Override
+    public int run(){
         logger.info("Query 1 Client Starting ...");
-
-        try {
-            BufferedWriter timesLogger = Files.newBufferedWriter(Path.of("client/src/main/assembly/times-query-one.txt"), StandardCharsets.UTF_8);
-            timesLogger.write("### Times of Query 1 ###\n");
-
-            // Group Config
-            GroupConfig groupConfig = new GroupConfig().setName("g05-hazelcast").setPassword("g05-hazelcast-pass");
-
-            // Client Network Config
-            ClientNetworkConfig clientNetworkConfig = new ClientNetworkConfig();
-            clientNetworkConfig.addAddress("127.0.0.1");
-
-            // Client Config
-            ClientConfig clientConfig = new ClientConfig().setGroupConfig(groupConfig).setNetworkConfig(clientNetworkConfig);
-
-            // Node Client
-            HazelcastInstance hazelcastInstance = HazelcastClient.newHazelcastClient(clientConfig);
-
+        try{
+            timesWriter.write("# Times of Query 1 \n");
             // Job Tracker
             JobTracker jobTracker = hazelcastInstance.getJobTracker("query-1");
 
-            // Read from csv file and loads maps
-            IMap<Integer, ZonesRow> zonesMap = hazelcastInstance.getMap("zones");                       // key is the zones id
+            timesWriter.write("[INFO] Started Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            this.loadZonesData();
 
-            IMap<Integer, TripRow> tripsMap = hazelcastInstance.getMap("trips");                        // key is PULocationId
-            KeyValueSource<Integer, TripRow> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
-
+            // now loading the data
+            IMap<Integer, TripRowQ1> tripsMap = hazelcastInstance.getMap("trips");// key is PULocationId
+            KeyValueSource<Integer, TripRowQ1> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
             final AtomicInteger tripsMapKey = new AtomicInteger();
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            timesLogger.write("[INFO] Start Data Loading: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/trips-2025-01-mini-400000.csv"), StandardCharsets.UTF_8)) {
-                lines.skip(1)
+            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+                lines.parallel().skip(1)
                         .map(line -> line.split(";"))
-                        .map(line -> new TripRow(
-                                line[0],
-                                LocalDateTime.parse(line[1], dateTimeFormatter),
-                                LocalDateTime.parse(line[2], dateTimeFormatter),
-                                LocalDateTime.parse(line[3], dateTimeFormatter),
-                                Integer.parseInt(line[4]),
-                                Integer.parseInt(line[5]),
-                                Double.parseDouble(line[6]),
-                                Double.parseDouble(line[7])
+                        .filter(line -> {
+                            int puId = Integer.parseInt(line[4]);
+                            int doId = Integer.parseInt(line[5]);
+                            if ( puId == doId )
+                                return false;
+                            return (this.zonesMap.get(puId) != null) && (this.zonesMap.get(doId) != null);
+                        })
+                        .map(line -> new TripRowQ1(
+                                zonesMap.get(Integer.parseInt(line[4])).getZone(),
+                                zonesMap.get(Integer.parseInt(line[5])).getZone(),
+                                Double.parseDouble(line[6])
                         ))
-                        .forEach(trip -> tripsMap.put(tripsMapKey.getAndIncrement(), trip));
+                        .forEach(trip -> {
+                            Integer uniqueId = tripsMapKey.getAndIncrement();
+                            tripsMap.put(uniqueId, trip);
+                        });
             }
 
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/zones.csv"), StandardCharsets.UTF_8)) {
-                lines.skip(1)
-                        .map(line -> line.split(";"))
-                        .map(line -> new ZonesRow(
-                                Integer.parseInt(line[0]),
-                                line[1],
-                                line[2]
-                        ))
-                        .forEach(zone -> zonesMap.put(zone.getLocationID(), zone));
-            }
+            timesWriter.write("[INFO] Finished Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            timesWriter.write("[INFO] Started Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
-            timesLogger.write("[INFO] End Data Loading: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-
-            // Map Reduce Job
-            timesLogger.write("[INFO] Start Map Reduce Job: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            Job<Integer, TripRow> job = jobTracker.newJob(tripsKeyValueSource);
+            Job<Integer, TripRowQ1> job = jobTracker.newJob(tripsKeyValueSource);
             ICompletableFuture<SortedSet<QueryOneFourResult>> future = job
                     .mapper(new StartEndPairMapper())
                     .reducer(new StartEndPairReducerFactory())
-                    .submit(new QueryOneCollator(zonesMap));
+                    .submit(new QueryOneCollator());
 
             // Process Data
             SortedSet<QueryOneFourResult> results = future.get();
-            timesLogger.write("[INFO] End Map Reduce Job: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
-            // Write Data
-            String path = "client/src/main/assembly/query1.csv";
-            Path outputPath = Paths.get(path);
+            timesWriter.write("[INFO] Finished Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            timesWriter.write("[INFO] Started Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
-            try (BufferedWriter fileWriter = Files.newBufferedWriter(outputPath, StandardCharsets.UTF_8);
-                 PrintWriter printWriter = new PrintWriter(fileWriter)) {
+            List<String> toPrint = results.stream().map(Objects::toString).toList();
+            this.printResults(toPrint);
 
-                // Write header
-                printWriter.println("pickUpZone;dropOffZone;trips");
+            timesWriter.write("[INFO] Finished Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
-                // Loop through results and write each line
-                for (QueryOneFourResult resultLine : results) {
-                    printWriter.println(resultLine.toString());
-                }
-
-            }
-            timesLogger.close();
-
-            // Check items loaded
-            //System.out.printf("trip map size (small) : %d", tripsMap.size());
-            //System.out.printf("zone map size : %d", zonesMap.size());
-        } finally {
-            HazelcastClient.shutdownAll();
+            timesWriter.close();
+        }catch ( Exception e ){
+            logger.error("Error in the execution of the query 1: {}", e.getLocalizedMessage());
+            return 1;
+        }finally{
+            finalizeHazelcast();
         }
+
+        return 0;
+    }
+
+
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+
+        ClientQuery1 query1 = new ClientQuery1(System.getProperty("addresses"), System.getProperty("inPath"), System.getProperty("outPath"));
+
+        query1.run();
+
     }
 }

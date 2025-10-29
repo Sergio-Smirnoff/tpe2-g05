@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 public class ClientQuery3 {
     private static Logger logger = LoggerFactory.getLogger(Client.class);
-
+/*
     public static void main(String[] args) throws InterruptedException {
         logger.info("tpe2-g05 Client Starting ...");
         logger.info("grpc-com-patterns Client Starting ...");
@@ -66,7 +66,7 @@ public class ClientQuery3 {
             try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/trips-2025-01.csv"), StandardCharsets.UTF_8)) {
                 lines.skip(1)
                         .map(line -> line.split(";"))
-                        .map(line -> new TripRow(
+                        .map(line -> new TripRowQ3(
                                 line[0],
                                 LocalDateTime.parse(line[1], dateTimeFormatter),
                                 LocalDateTime.parse(line[2], dateTimeFormatter),
@@ -138,5 +138,5 @@ public class ClientQuery3 {
         }finally {
             HazelcastClient.shutdownAll();
         }
-    }
+    }*/
 }
