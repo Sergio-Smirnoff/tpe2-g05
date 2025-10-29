@@ -1,12 +1,10 @@
-package ar.edu.itba.pod.hazelcast.client.query4;
+package ar.edu.itba.pod.hazelcast.client;
 
 import ar.edu.itba.pod.hazelcast.common.QueryOneFourResult;
 import ar.edu.itba.pod.hazelcast.common.TripRowQuery4;
-import ar.edu.itba.pod.hazelcast.common.TripRowQuery4_2;
 import ar.edu.itba.pod.hazelcast.common.ZonesRow;
 import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneCollator;
 import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneMapper;
-import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneMapper2;
 import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneReducerFactory;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
@@ -37,8 +35,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class ClientQuery4_2 {
-    private static final Logger logger = LoggerFactory.getLogger(ClientQuery4_2.class);
+public class ClientQuery4 {
+    private static final Logger logger = LoggerFactory.getLogger(ClientQuery4.class);
 
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         logger.info("Query 4_2 Client Starting ...");
@@ -71,14 +69,17 @@ public class ClientQuery4_2 {
              */
             Map<Integer, ZonesRow> zonesMap = new HashMap<>();                                                  // key is the zones id
 
-            IMap<Integer, TripRowQuery4_2> tripsMap = hazelcastInstance.getMap("trips");                        // key is PULocationId
-            KeyValueSource<Integer, TripRowQuery4_2> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
+            IMap<Integer, TripRowQuery4> tripsMap = hazelcastInstance.getMap("trips");                        // key is PULocationId
+            KeyValueSource<Integer, TripRowQuery4> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
             String borough = "Manhattan";
             final AtomicInteger tripsMapKey = new AtomicInteger();
 
             timesLogger.write("[INFO] Start Data Loading: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            /*
+             *  Para las zonas necesito los tres campos
+             */
             try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/zones.csv"), StandardCharsets.UTF_8)) {
                 lines.skip(1)
                         .map(line -> line.split(";"))
@@ -90,7 +91,9 @@ public class ClientQuery4_2 {
                         .forEach(zone -> zonesMap.put(zone.getLocationID(), zone));
             }
 
-
+            /*
+            *    Para los trips uso request time, pickup time (ambos LocalDateTime, pu zone como string y do zone como string
+            */
             try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/trips-2025-01-mini-400000.csv"), StandardCharsets.UTF_8)) {
                 lines.skip(1)
                         .map(line -> line.split(";"))
@@ -100,11 +103,11 @@ public class ClientQuery4_2 {
 
                             return PUZoneRow != null && DOZoneRow != null && PUZoneRow.getBorogh().compareTo(borough) == 0;
                         })
-                        .map(line -> new TripRowQuery4_2(
+                        .map(line -> new TripRowQuery4(
                                 LocalDateTime.parse(line[1], dateTimeFormatter),
                                 LocalDateTime.parse(line[2], dateTimeFormatter),
-                                line[4],        // cambiar a que reciba el string
-                                line[5]
+                                zonesMap.get(Integer.parseInt(line[4])).getZone(),
+                                zonesMap.get(Integer.parseInt(line[5])).getZone()
                         ))
                         .forEach(trip -> tripsMap.put(tripsMapKey.getAndIncrement(), trip));
             }
@@ -113,9 +116,9 @@ public class ClientQuery4_2 {
 
             // Map Reduce Job
             timesLogger.write("[INFO] Start Map Reduce Job: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            Job<Integer, TripRowQuery4_2> job = jobTracker.newJob(tripsKeyValueSource);
+            Job<Integer, TripRowQuery4> job = jobTracker.newJob(tripsKeyValueSource);
             ICompletableFuture<SortedSet<QueryOneFourResult>> future = job
-                    .mapper(new DelayPerBoroughZoneMapper2())
+                    .mapper(new DelayPerBoroughZoneMapper())
                     .reducer(new DelayPerBoroughZoneReducerFactory())
                     .submit(new DelayPerBoroughZoneCollator());
 
