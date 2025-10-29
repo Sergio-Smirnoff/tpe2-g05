@@ -24,10 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -91,7 +88,10 @@ public class ClientQuery1 extends Client{
             timesWriter.write("[INFO] Finished Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
             timesWriter.write("[INFO] Started Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
-            List<String> toPrint = results.stream().map(Objects::toString).toList();
+            List<String> toPrint = new ArrayList<>();
+            // Add headers
+            toPrint.add("pickUpZone;dropOffZone;trips");
+            toPrint.addAll(results.stream().map(Objects::toString).toList());
             this.printResults(toPrint);
 
             timesWriter.write("[INFO] Finished Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");

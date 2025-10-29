@@ -5,7 +5,6 @@ import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 public class TripRowQ1 extends TripRow {
 

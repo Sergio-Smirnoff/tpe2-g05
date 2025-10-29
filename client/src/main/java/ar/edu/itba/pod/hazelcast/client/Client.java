@@ -38,10 +38,10 @@ abstract class Client {
     public Client(String address, String inPath, String outPath){
         this.address = "localhost";
         this.inPath = inPath;
-        this.outPath = "client/src/main/assembly/query1.csv";
+        this.outPath = "client/src/main/assembly/query3.csv";
         this.logger = LoggerFactory.getLogger(this.getClass());
         try {
-            this.timesWriter = Files.newBufferedWriter(Path.of("client/src/main/assembly/times1.csv"), StandardCharsets.UTF_8);
+            this.timesWriter = Files.newBufferedWriter(Path.of("client/src/main/assembly/times.csv"), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
