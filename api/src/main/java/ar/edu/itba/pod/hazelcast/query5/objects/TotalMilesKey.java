@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.hazelcast.query5;
+package ar.edu.itba.pod.hazelcast.query5.objects;
 
 import java.io.Serializable;
 import java.util.Objects;

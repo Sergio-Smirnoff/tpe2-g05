@@ -1,7 +1,6 @@
-package ar.edu.itba.pod.hazelcast.query5;
+package ar.edu.itba.pod.hazelcast.query5.objects;
 
 import ar.edu.itba.pod.hazelcast.common.TripRow;
-import ar.edu.itba.pod.hazelcast.common.TripRowQuery4;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 

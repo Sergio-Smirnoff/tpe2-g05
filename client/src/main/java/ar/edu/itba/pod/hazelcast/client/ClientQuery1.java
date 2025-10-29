@@ -108,7 +108,7 @@ public class ClientQuery1 extends Client{
     }
 
 
-    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+    public static void main(String[] args){
 
         ClientQuery1 query1 = new ClientQuery1(System.getProperty("addresses"), System.getProperty("inPath"), System.getProperty("outPath"));
 

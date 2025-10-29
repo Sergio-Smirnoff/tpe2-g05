@@ -36,9 +36,9 @@ abstract class Client {
     protected final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public Client(String address, String inPath, String outPath){
-        this.address = "localhost";
+        this.address = address;
         this.inPath = inPath;
-        this.outPath = "client/src/main/assembly/query3.csv";
+        this.outPath = outPath;
         this.logger = LoggerFactory.getLogger(this.getClass());
         try {
             this.timesWriter = Files.newBufferedWriter(Path.of("client/src/main/assembly/times.csv"), StandardCharsets.UTF_8);
