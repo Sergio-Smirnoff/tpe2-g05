@@ -1,142 +1,98 @@
 package ar.edu.itba.pod.hazelcast.client;
 
 
-
 import ar.edu.itba.pod.hazelcast.query3.*;
-import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.client.config.ClientConfig;
-import com.hazelcast.client.config.ClientNetworkConfig;
-import com.hazelcast.config.GroupConfig;
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ar.edu.itba.pod.hazelcast.common.*;
-
-import java.io.BufferedWriter;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class ClientQuery3 {
-    private static Logger logger = LoggerFactory.getLogger(Client.class);
-/*
-    public static void main(String[] args) throws InterruptedException {
-        logger.info("tpe2-g05 Client Starting ...");
-        logger.info("grpc-com-patterns Client Starting ...");
-        try {
+public class ClientQuery3 extends Client{
 
-            BufferedWriter timesLogger = Files.newBufferedWriter(Path.of("client/src/main/assembly/times.txt"), StandardCharsets.UTF_8);
+    public ClientQuery3(final String address, final String inPath, final String outPath){
+        super(address, inPath, outPath);
+        super.initializeHazelcast();
+    }
 
-            timesLogger.write("### Times of Query 3 ###\n");
-            // Group Config
-            GroupConfig groupConfig = new GroupConfig().setName("g05-hazelcast").setPassword("g05-hazelcast-pass");
+    @Override
+    public int run(){
+        try{
+            logger.info("======== Started executing query 3 ========");
+            timesWriter.write("# Times of Query 3 \n");
+            timesWriter.write("[INFO] Started Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            this.loadZonesData();
 
-            // Client Network Config
-            ClientNetworkConfig clientNetworkConfig = new ClientNetworkConfig();
-            clientNetworkConfig.addAddress("127.0.0.1");
-
-            // Client Config
-            ClientConfig clientConfig = new ClientConfig().setGroupConfig(groupConfig).setNetworkConfig(clientNetworkConfig);
-
-            // Node Client
-            HazelcastInstance hazelcastInstance = HazelcastClient.newHazelcastClient(clientConfig);
-            timesLogger.write(String.format("Start Data Loading: %s \n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-
-            // Read from csv file and loads maps
-            IMap<Integer, ZonesRow> zonesMap = hazelcastInstance.getMap("zones");                       // key is the zones id
-
-            IMap<Integer, TripRow> tripsMap = hazelcastInstance.getMap("trips");                        // key is PULocationId
-            KeyValueSource<Integer, TripRow> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
-
+            // now loading the data
+            IMap<Integer, TripRowQ3> tripsMap = hazelcastInstance.getMap("trips");// key is PULocationId
+            KeyValueSource<Integer, TripRowQ3> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
             final AtomicInteger tripsMapKey = new AtomicInteger();
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/trips-2025-01.csv"), StandardCharsets.UTF_8)) {
-                lines.skip(1)
+            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+                lines.parallel().skip(1)
                         .map(line -> line.split(";"))
+                        .filter(line -> {
+                            ZonesRow pu = this.zonesMap.get(Integer.parseInt(line[4]));
+                            if ( pu == null )
+                                return false;
+                            String aux = pu.getZone();
+                            return !aux.equals("Outside of NYC");
+                        })
                         .map(line -> new TripRowQ3(
+                                zonesMap.get(Integer.parseInt(line[4])).getBorough(), // borough
                                 line[0],
-                                LocalDateTime.parse(line[1], dateTimeFormatter),
-                                LocalDateTime.parse(line[2], dateTimeFormatter),
-                                LocalDateTime.parse(line[3], dateTimeFormatter),
-                                Integer.parseInt(line[4]),
-                                Integer.parseInt(line[5]),
-                                Double.parseDouble(line[6]),
                                 Double.parseDouble(line[7])
                         ))
-                        .forEach(trip -> tripsMap.put(tripsMapKey.getAndIncrement(), trip));
+                        .forEach(trip -> {
+                            Integer uniqueId = tripsMapKey.getAndIncrement();
+                            tripsMap.put(uniqueId, trip);
+                        });
             }
 
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/zones.csv"), StandardCharsets.UTF_8)) {
-                lines.skip(1)
-                        .map(line -> line.split(";"))
-                        .map(line -> new ZonesRow(
-                                Integer.parseInt(line[0]),
-                                line[1],
-                                line[2]
-                        ))
-                        .forEach(zone -> zonesMap.put(zone.getLocationID(), zone));
-            }
+            timesWriter.write("[INFO] Finished Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            timesWriter.write("[INFO] Started Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
-            timesLogger.write(String.format("End Data Loading: %s\n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-            timesLogger.write(String.format("Start Data Querying: %s\n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-
-
-            // ======================== Query ==========================
             JobTracker jobTracker = hazelcastInstance.getJobTracker("avgPriceByZoneAndComp");
 
-
             // Map Reduce Job
-            Job<Integer, TripRow> job = jobTracker.newJob(tripsKeyValueSource);
-            ICompletableFuture<List<Map.Entry<PickupCompanyPair, Double>>> future = job
+            Job<Integer, TripRowQ3> job = jobTracker.newJob(tripsKeyValueSource);
+            ICompletableFuture<List<AvgPriceBoroughCompany>> future = job
                     .mapper(new PriceAvgMapper())
                     .reducer(new PickupCompanyPairReducerFactory())
                     .submit(new Query3Collator());
 
             // Process Data
-            List<Map.Entry<PickupCompanyPair, Double>> result = future.get();
+            List<AvgPriceBoroughCompany> result = future.get();
 
-            List<AvgPriceBoroughCompany> toReturn = new ArrayList<>();
-            for (Map.Entry<PickupCompanyPair, Double> entry : result) {
-                toReturn.add(new AvgPriceBoroughCompany(entry.getKey().getPULocation(), entry.getKey().getCompany(), entry.getValue()));
-            }
+            timesWriter.write("[INFO] Finished Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            timesWriter.write("[INFO] Started Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
-            // Write Data
-            String path = "client/src/main/assembly/query3.csv";
-            Path outputPath = Paths.get(path);
+            List<String> toPrint = new ArrayList<>();
+            toPrint.add("pickUpBorough;company;avgFare");
+            toPrint.addAll(result.stream().map(Objects::toString).toList());
+            this.printResults(toPrint);
 
-            try (BufferedWriter fileWriter = Files.newBufferedWriter(outputPath, StandardCharsets.UTF_8);
-                 PrintWriter printWriter = new PrintWriter(fileWriter)) {
+            timesWriter.write("[INFO] Finished Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            timesWriter.close();
 
-                // Write header
-                printWriter.println("pickUpBorough;company;avgFare");
-
-                // Loop through results and write each line
-                for (AvgPriceBoroughCompany resultLine : toReturn) {
-                    printWriter.println(resultLine);
-                }
-
-            }
-            timesLogger.write(String.format("End Data Querying: %s\n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-            timesLogger.close();
-            // ======================== End Query =======================
-
-        } catch( Exception e){
-            logger.error(e.getLocalizedMessage());
+        } catch (Exception e) {
+            logger.error("Error occurred running query 3: {}", e.getLocalizedMessage());
+            return 1;
         }finally {
-            HazelcastClient.shutdownAll();
+            finalizeHazelcast();
         }
-    }*/
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        ClientQuery3 clientQuery3 = new ClientQuery3(System.getProperty("addresses"), System.getProperty("inPath"), System.getProperty("outPath"));
+        clientQuery3.run();
+    }
 }

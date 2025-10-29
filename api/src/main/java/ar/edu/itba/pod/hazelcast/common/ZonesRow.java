@@ -9,14 +9,14 @@ import java.io.IOException;
 public class ZonesRow implements DataSerializable {
 
     private int LocationID;
-    private String Borogh;
+    private String Borough;
     private String Zone;
 
     public ZonesRow(){}
 
     public ZonesRow(int locationID, String borogh, String zone) {
         LocationID = locationID;
-        Borogh = borogh;
+        Borough = borogh;
         Zone = zone;
     }
 
@@ -24,8 +24,8 @@ public class ZonesRow implements DataSerializable {
         return LocationID;
     }
 
-    public String getBorogh() {
-        return Borogh;
+    public String getBorough() {
+        return Borough;
     }
 
     public String getZone() {
@@ -35,14 +35,14 @@ public class ZonesRow implements DataSerializable {
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
         out.writeInt(LocationID);
-        out.writeUTF(Borogh);
+        out.writeUTF(Borough);
         out.writeUTF(Zone);
     }
 
     @Override
     public void readData(ObjectDataInput in) throws IOException {
         LocationID = in.readInt();
-        Borogh = in.readUTF();
+        Borough = in.readUTF();
         Zone = in.readUTF();
     }
 }
