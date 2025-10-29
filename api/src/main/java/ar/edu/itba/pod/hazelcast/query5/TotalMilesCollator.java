@@ -1,17 +1,18 @@
 package ar.edu.itba.pod.hazelcast.query5;
 
+import ar.edu.itba.pod.hazelcast.query5.objects.TotalMilesKey;
+import ar.edu.itba.pod.hazelcast.query5.objects.TotalMilesResult;
 import com.hazelcast.mapreduce.Collator;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class TotalMilesCollator implements Collator<Map.Entry<TotalMilesKey, Double>, List<Map.Entry<TotalMilesKey, Double>>> {
+public class TotalMilesCollator implements Collator<Map.Entry<TotalMilesKey, Double>, List<TotalMilesResult>> {
     @Override
-    public List<Map.Entry<TotalMilesKey, Double>> collate(Iterable<Map.Entry<TotalMilesKey, Double>> iterable) {
+    public List<TotalMilesResult> collate(Iterable<Map.Entry<TotalMilesKey, Double>> iterable) {
 
         // --------------- SORT ----------------------
-        List<Map.Entry<TotalMilesKey, Double>> result = StreamSupport.stream(iterable.spliterator(), false)
+        List<Map.Entry<TotalMilesKey, Double>> ordered = StreamSupport.stream(iterable.spliterator(), false)
                 .sorted(Comparator.comparing((Map.Entry<TotalMilesKey, Double> e) -> e.getKey().company())
                         .thenComparing(e -> e.getKey().year())
                         .thenComparing(e -> e.getKey().month()))
@@ -19,23 +20,25 @@ public class TotalMilesCollator implements Collator<Map.Entry<TotalMilesKey, Dou
 
         // ---------------- YTD SUM --------------------
         String previousCompany = null;
-        Integer actualYear = null;
+        Integer previousYear = null;
         Double previousTotal = null;
 
-        for (Map.Entry<TotalMilesKey, Double> e : result) {
-            String company = e.getKey().company();
-            if(previousCompany == null || !previousCompany.equals(company) || actualYear != e.getKey().year()) {
-                previousCompany = company;
-                actualYear = e.getKey().year();
+        List<TotalMilesResult> result = new ArrayList<>();
+
+        for (Map.Entry<TotalMilesKey, Double> e : ordered) {
+            String actualCompany = e.getKey().company();
+            int actualYear = e.getKey().year();
+            if(previousCompany == null || !previousCompany.equals(actualCompany) || previousYear != actualYear)
                 previousTotal = 0.0;
-            }
 
             double totalYTD = previousTotal + e.getValue();
-
             double truncatedValue = Math.floor(totalYTD * 100) / 100;
-            e.setValue(truncatedValue);
+            result.add(new TotalMilesResult(actualCompany, actualYear, e.getKey().month(), truncatedValue));
 
+            // Update previous values
             previousTotal = totalYTD;
+            previousCompany = actualCompany;
+            previousYear = actualYear;
         }
 
         return result;
