@@ -14,7 +14,7 @@ public class TotalMilesMapper implements Mapper<Integer, TripRow, TotalMilesKey,
 
     @Override
     public void map(Integer integer, TripRow tripRow, Context<TotalMilesKey, Double> context) {
-        TotalMilesKey key = new TotalMilesKey(tripRow.getCompany(), tripRow.getRequest_time().getYear(), tripRow.getRequest_time().getMonthValue());
+        TotalMilesKey key = new TotalMilesKey(tripRow.getCompany(), tripRow.getRequestTime().getYear(), tripRow.getRequestTime().getMonthValue());
         context.emit(key, tripRow.getTrip_miles());
     }
 }
