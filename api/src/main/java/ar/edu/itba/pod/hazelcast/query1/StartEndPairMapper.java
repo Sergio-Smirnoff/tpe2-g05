@@ -13,23 +13,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class StartEndPairMapper implements Mapper<Integer, TripRow, Pair<Integer, Integer>, Long>, HazelcastInstanceAware {
+public class StartEndPairMapper implements Mapper<Integer, TripRowQ1, Pair<String, String>, Long> {
     private static final Long ONE = 1L;
-    private transient Set<Integer> localZoneIds;
-
     @Override
-    public void map(Integer integer, TripRow tripRow, Context<Pair<Integer, Integer>, Long> context) {
-        int PULocationId = tripRow.getPULocationID();
-        int DOLocationId = tripRow.getDOLocationID();
-
-        if(localZoneIds.contains(PULocationId) && localZoneIds.contains(DOLocationId) && PULocationId != DOLocationId) {
-            context.emit(new Pair<>(PULocationId, DOLocationId), ONE);
-        }
-    }
-
-    @Override
-    public void setHazelcastInstance(HazelcastInstance hazelcastInstance){
-        IMap<Integer, ZonesRow> zonesMap = hazelcastInstance.getMap("zones");
-        this.localZoneIds = new HashSet<>(zonesMap.keySet());
+    public void map(Integer integer, TripRowQ1 tripRow, Context<Pair<String, String>, Long> context) {
+        context.emit(new Pair<>(tripRow.getPULocation(), tripRow.getDOLocation()), ONE);
     }
 }

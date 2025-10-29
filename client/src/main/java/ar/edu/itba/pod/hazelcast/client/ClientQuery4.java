@@ -101,7 +101,7 @@ public class ClientQuery4 {
                             ZonesRow PUZoneRow = zonesMap.get(Integer.parseInt(line[4]));
                             ZonesRow DOZoneRow = zonesMap.get(Integer.parseInt(line[5]));
 
-                            return PUZoneRow != null && DOZoneRow != null && PUZoneRow.getBorogh().compareTo(borough) == 0;
+                            return PUZoneRow != null && DOZoneRow != null && PUZoneRow.getBorough().compareTo(borough) == 0;
                         })
                         .map(line -> new TripRowQuery4(
                                 LocalDateTime.parse(line[1], dateTimeFormatter),
