@@ -2,8 +2,6 @@ package ar.edu.itba.pod.hazelcast.client;
 
 
 
-import ar.edu.itba.pod.hazelcast.query1.QueryOneResult;
-import ar.edu.itba.pod.hazelcast.query1.StartEndPair;
 import ar.edu.itba.pod.hazelcast.query3.*;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;

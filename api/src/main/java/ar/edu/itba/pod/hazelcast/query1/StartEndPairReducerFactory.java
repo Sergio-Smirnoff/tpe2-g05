@@ -1,11 +1,12 @@
 package ar.edu.itba.pod.hazelcast.query1;
 
+import ar.edu.itba.pod.hazelcast.common.Pair;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
-public class StartEndPairReducerFactory implements ReducerFactory<StartEndPair, Long, Long> {
+public class StartEndPairReducerFactory implements ReducerFactory<Pair<Integer, Integer>, Long, Long> {
     @Override
-    public Reducer<Long, Long> newReducer(StartEndPair key){
+    public Reducer<Long, Long> newReducer(Pair key){
         return new StartEndPairReducer();
     }
 

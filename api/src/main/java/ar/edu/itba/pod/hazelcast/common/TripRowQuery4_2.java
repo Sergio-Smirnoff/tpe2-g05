@@ -6,26 +6,27 @@ import com.hazelcast.nio.serialization.DataSerializable;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
-public class TripRowQuery4 implements DataSerializable {
+public class TripRowQuery4_2 implements DataSerializable {
     private LocalDateTime requestTime;
     private LocalDateTime pickupTime;
-    private int PULocationID;
-    private int DOLocationID;
+    private String PUZone;
+    private String DOZone;
 
-    public TripRowQuery4(){}
+    public TripRowQuery4_2(){}
 
-    public TripRowQuery4(
+    public TripRowQuery4_2(
             LocalDateTime request_time,
             LocalDateTime pickup_time,
-            int PULocationID,
-            int DOLocationID
+            String PUZone,
+            String DOZone
     ) {
         this.requestTime = request_time;
         this.pickupTime = pickup_time;
-        this.PULocationID = PULocationID;
-        this.DOLocationID = DOLocationID;
+        this.PUZone = PUZone;
+        this.DOZone = DOZone;
     }
 
     public LocalDateTime getRequestTime() {
@@ -36,12 +37,12 @@ public class TripRowQuery4 implements DataSerializable {
         return pickupTime;
     }
 
-    public int getPULocationID() {
-        return PULocationID;
+    public String getPUZone() {
+        return PUZone;
     }
 
-    public int getDOLocationID() {
-        return DOLocationID;
+    public String getDOZone() {
+        return DOZone;
     }
 
     public long getDelayInSeconds() {
@@ -52,15 +53,15 @@ public class TripRowQuery4 implements DataSerializable {
     public void writeData(ObjectDataOutput out) throws IOException {
         out.writeObject(requestTime);
         out.writeObject(pickupTime);
-        out.writeInt(PULocationID);
-        out.writeInt(DOLocationID);
+        out.writeUTF(PUZone);
+        out.writeUTF(DOZone);
     }
 
     @Override
     public void readData(ObjectDataInput in) throws IOException {
         requestTime = in.readObject();
         pickupTime = in.readObject();
-        PULocationID = in.readInt();
-        DOLocationID = in.readInt();
+        PUZone = in.readUTF();
+        DOZone = in.readUTF();
     }
 }

@@ -1,9 +1,11 @@
-package ar.edu.itba.pod.hazelcast.client;
+package ar.edu.itba.pod.hazelcast.client.query4;
 
 import ar.edu.itba.pod.hazelcast.common.QueryOneFourResult;
-import ar.edu.itba.pod.hazelcast.common.TripRow;
+import ar.edu.itba.pod.hazelcast.common.TripRowQuery4;
 import ar.edu.itba.pod.hazelcast.common.ZonesRow;
-import ar.edu.itba.pod.hazelcast.query1.*;
+import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneCollator;
+import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneMapper;
+import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneReducerFactory;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
@@ -31,15 +33,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class ClientQuery1 {
-    private static final Logger logger = LoggerFactory.getLogger(Client.class);
+public class ClientQuery4 {
+    private static final Logger logger = LoggerFactory.getLogger(ClientQuery4.class);
 
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
-        logger.info("Query 1 Client Starting ...");
+        logger.info("Query 4 Client Starting ...");
 
         try {
-            BufferedWriter timesLogger = Files.newBufferedWriter(Path.of("client/src/main/assembly/times-query-one.txt"), StandardCharsets.UTF_8);
-            timesLogger.write("### Times of Query 1 ###\n");
+            BufferedWriter timesLogger = Files.newBufferedWriter(Path.of("client/src/main/assembly/times-query-four.txt"), StandardCharsets.UTF_8);
+            timesLogger.write("### Times of Query 4 ###\n");
 
             // Group Config
             GroupConfig groupConfig = new GroupConfig().setName("g05-hazelcast").setPassword("g05-hazelcast-pass");
@@ -55,13 +57,13 @@ public class ClientQuery1 {
             HazelcastInstance hazelcastInstance = HazelcastClient.newHazelcastClient(clientConfig);
 
             // Job Tracker
-            JobTracker jobTracker = hazelcastInstance.getJobTracker("query-1");
+            JobTracker jobTracker = hazelcastInstance.getJobTracker("query-4");
 
             // Read from csv file and loads maps
             IMap<Integer, ZonesRow> zonesMap = hazelcastInstance.getMap("zones");                       // key is the zones id
 
-            IMap<Integer, TripRow> tripsMap = hazelcastInstance.getMap("trips");                        // key is PULocationId
-            KeyValueSource<Integer, TripRow> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
+            IMap<Integer, TripRowQuery4> tripsMap = hazelcastInstance.getMap("trips");                        // key is PULocationId
+            KeyValueSource<Integer, TripRowQuery4> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
 
             final AtomicInteger tripsMapKey = new AtomicInteger();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -69,15 +71,11 @@ public class ClientQuery1 {
             try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/trips-2025-01-mini-400000.csv"), StandardCharsets.UTF_8)) {
                 lines.skip(1)
                         .map(line -> line.split(";"))
-                        .map(line -> new TripRow(
-                                line[0],
+                        .map(line -> new TripRowQuery4(
                                 LocalDateTime.parse(line[1], dateTimeFormatter),
                                 LocalDateTime.parse(line[2], dateTimeFormatter),
-                                LocalDateTime.parse(line[3], dateTimeFormatter),
                                 Integer.parseInt(line[4]),
-                                Integer.parseInt(line[5]),
-                                Double.parseDouble(line[6]),
-                                Double.parseDouble(line[7])
+                                Integer.parseInt(line[5])
                         ))
                         .forEach(trip -> tripsMap.put(tripsMapKey.getAndIncrement(), trip));
             }
@@ -97,29 +95,30 @@ public class ClientQuery1 {
 
             // Map Reduce Job
             timesLogger.write("[INFO] Start Map Reduce Job: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            Job<Integer, TripRow> job = jobTracker.newJob(tripsKeyValueSource);
+            String borough = "Manhattan";           // leer de args
+            Job<Integer, TripRowQuery4> job = jobTracker.newJob(tripsKeyValueSource);
             ICompletableFuture<SortedSet<QueryOneFourResult>> future = job
-                    .mapper(new StartEndPairMapper())
-                    .reducer(new StartEndPairReducerFactory())
-                    .submit(new QueryOneCollator(zonesMap));
+                    .mapper(new DelayPerBoroughZoneMapper(borough))
+                    .reducer(new DelayPerBoroughZoneReducerFactory())
+                    .submit(new DelayPerBoroughZoneCollator());
 
             // Process Data
             SortedSet<QueryOneFourResult> results = future.get();
             timesLogger.write("[INFO] End Map Reduce Job: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
             // Write Data
-            String path = "client/src/main/assembly/query1.csv";
+            String path = "client/src/main/assembly/query4.csv";
             Path outputPath = Paths.get(path);
 
             try (BufferedWriter fileWriter = Files.newBufferedWriter(outputPath, StandardCharsets.UTF_8);
                  PrintWriter printWriter = new PrintWriter(fileWriter)) {
 
                 // Write header
-                printWriter.println("pickUpZone;dropOffZone;trips");
+                printWriter.println("pickUpZone;dropOffZone;delayInSeconds");
 
                 // Loop through results and write each line
-                for (QueryOneFourResult resultLine : results) {
-                    printWriter.println(resultLine.toString());
+                for (QueryOneFourResult result: results) {
+                    printWriter.println(result.toString());
                 }
 
             }
