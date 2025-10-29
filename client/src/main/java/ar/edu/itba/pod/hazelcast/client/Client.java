@@ -2,83 +2,67 @@ package ar.edu.itba.pod.hazelcast.client;
 
 
 
+
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.config.GroupConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.MultiMap;
-import com.hazelcast.mapreduce.JobTracker;
-import com.hazelcast.mapreduce.KeyValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ar.edu.itba.pod.hazelcast.common.*;
-
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.stream.Stream;
+import java.nio.file.Path;
 
-public class Client {
-    private static Logger logger = LoggerFactory.getLogger(Client.class);
 
-    public static void main(String[] args) throws InterruptedException {
-        logger.info("tpe2-g05 Client Starting ...");
-        logger.info("grpc-com-patterns Client Starting ...");
+abstract class Client {
+    protected Logger logger;
+    protected BufferedWriter timesWriter;
+    protected String address;
+    protected String inPath;
+    protected String outPath;
+    protected HazelcastInstance hazelcastInstance;
+
+    public Client(String address, String inPath, String outPath){
+        this.address = address;
+        this.inPath = inPath;
+        this.outPath = outPath;
+        this.logger = LoggerFactory.getLogger(this.getClass());
         try {
+            this.timesWriter = Files.newBufferedWriter(Path.of(outPath), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean initializeHazelcast(){
+        try{
             // Group Config
             GroupConfig groupConfig = new GroupConfig().setName("g05-hazelcast").setPassword("g05-hazelcast-pass");
 
             // Client Network Config
             ClientNetworkConfig clientNetworkConfig = new ClientNetworkConfig();
-            clientNetworkConfig.addAddress("127.0.0.1");
+            clientNetworkConfig.addAddress(this.address);
 
             // Client Config
             ClientConfig clientConfig = new ClientConfig().setGroupConfig(groupConfig).setNetworkConfig(clientNetworkConfig);
 
             // Node Client
-            HazelcastInstance hazelcastInstance = HazelcastClient.newHazelcastClient(clientConfig);
-
-
-            // ======================== Query 3 =============================
-            // Tiene doble map and reduce porque primero tiene que filtrar los Borough que si van y luego hacer el avg de precio
-            // Key Value Source
-            MultiMap<Integer, TripRow> tripMultiMap = hazelcastInstance.getMultiMap("avgPriceByZoneAndComp");
-            KeyValueSource<Integer, TripRow> tripKeyValueSource = KeyValueSource.fromMultiMap(tripMultiMap);
-
-            // Job Tracker
-            JobTracker jobTracker = hazelcastInstance.getJobTracker("avgPriceByZoneAndComp");
-
-            // ======================== End Query 3 =============================
-
-            // Text File Reading and Key Value Source Loading
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/trips-2025-01.csv"), StandardCharsets.UTF_8)) {
-                lines.skip(1)
-                        .map(line -> line.split(";"))
-                        .map(line -> new TripRow(
-                                line[0],
-                                LocalDateTime.parse(line[1], dateTimeFormatter),
-                                LocalDateTime.parse(line[2], dateTimeFormatter),
-                                LocalDateTime.parse(line[3], dateTimeFormatter),
-                                Integer.parseInt(line[4]),
-                                Integer.parseInt(line[5]),
-                                Double.parseDouble(line[6]),
-                                Double.parseDouble(line[7])
-                        ))
-                        .forEach(trip -> tripMultiMap.put(trip.getPULocationID(), trip));
-            }
-
-            // Ejercicio 2.1
-            // Check how many objects where loaded
-            System.out.println(tripMultiMap.size());
-        } catch (Exception e) {
+            hazelcastInstance = HazelcastClient.newHazelcastClient(clientConfig);
+        }catch (Exception e){
             logger.error(e.getMessage());
+            return false;
         }finally {
             HazelcastClient.shutdownAll();
         }
+        return true;
+    }
+
+    public int run() {
+        initializeHazelcast();
+        return 0;
     }
 }
