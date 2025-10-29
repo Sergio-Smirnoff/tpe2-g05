@@ -1,6 +1,5 @@
 package ar.edu.itba.pod.hazelcast.query5;
 
-import ar.edu.itba.pod.hazelcast.query1.StartEndPair;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
