@@ -19,12 +19,14 @@ public class TotalMilesCollator implements Collator<Map.Entry<TotalMilesKey, Dou
 
         // ---------------- YTD SUM --------------------
         String previousCompany = null;
+        Integer actualYear = null;
         Double previousTotal = null;
 
         for (Map.Entry<TotalMilesKey, Double> e : result) {
             String company = e.getKey().company();
-            if(previousCompany == null || !previousCompany.equals(company)) {
+            if(previousCompany == null || !previousCompany.equals(company) || actualYear != e.getKey().year()) {
                 previousCompany = company;
+                actualYear = e.getKey().year();
                 previousTotal = 0.0;
             }
 
