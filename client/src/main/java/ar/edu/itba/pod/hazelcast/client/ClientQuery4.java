@@ -94,7 +94,7 @@ public class ClientQuery4 {
             /*
             *    Para los trips uso request time, pickup time (ambos LocalDateTime, pu zone como string y do zone como string
             */
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/trips-2025-01-mini-400000.csv"), StandardCharsets.UTF_8)) {
+            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
                 lines.skip(1)
                         .map(line -> line.split(";"))
                         .filter(line ->{
