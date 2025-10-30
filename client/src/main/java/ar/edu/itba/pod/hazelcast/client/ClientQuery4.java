@@ -36,7 +36,7 @@ public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult
         this.loadZonesData();
 
         // now loading the data
-        IMap<Integer, TripRowQ4> tripsMap = hazelcastInstance.getMap("trips");// key is PULocationId
+        IMap<Integer, TripRowQ4> tripsMap = hazelcastInstance.getMap("trips4");// key is PULocationId
         KeyValueSource<Integer, TripRowQ4> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
         final AtomicInteger tripsMapKey = new AtomicInteger();
         try (Stream<String> lines = Files.lines(Path.of(inPath).resolve("trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {

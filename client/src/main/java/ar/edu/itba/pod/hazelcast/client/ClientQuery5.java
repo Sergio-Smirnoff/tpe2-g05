@@ -31,7 +31,7 @@ public class ClientQuery5 extends Client<TripRowQ5, List<TotalMilesResult>> {
 
     @Override
     KeyValueSource<Integer, TripRowQ5> loadData() throws IOException {
-        IMap<Integer, TripRowQ5> tripsMap = hazelcastInstance.getMap("trips");
+        IMap<Integer, TripRowQ5> tripsMap = hazelcastInstance.getMap("trips5");
         KeyValueSource<Integer, TripRowQ5> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
 
         final AtomicInteger tripsMapKey = new AtomicInteger();

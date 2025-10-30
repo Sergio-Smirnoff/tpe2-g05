@@ -32,7 +32,7 @@ public class ClientQuery3 extends Client<TripRowQ3, List<AvgPriceBoroughCompany>
         this.loadZonesData();
 
         // now loading the data
-        IMap<Integer, TripRowQ3> tripsMap = hazelcastInstance.getMap("trips");// key is PULocationId
+        IMap<Integer, TripRowQ3> tripsMap = hazelcastInstance.getMap("trips3");// key is PULocationId
         KeyValueSource<Integer, TripRowQ3> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
         final AtomicInteger tripsMapKey = new AtomicInteger();
         try (Stream<String> lines = Files.lines(Path.of(inPath).resolve("trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {

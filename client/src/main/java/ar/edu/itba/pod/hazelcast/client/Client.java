@@ -108,7 +108,7 @@ abstract class Client<T, K> {
 
             timeLogger.info("Fin del trabajo map/reduce");
         } catch ( Exception e ){
-            logger.log(Level.SEVERE, "Error en la ejecución: {}", e.getLocalizedMessage());
+            logger.log(Level.SEVERE, "Error en la ejecución", e);
         } finally{
             HazelcastClient.shutdownAll();
         }
