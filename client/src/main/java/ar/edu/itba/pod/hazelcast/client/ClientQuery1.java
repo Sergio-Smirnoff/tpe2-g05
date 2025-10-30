@@ -7,97 +7,78 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
+
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class ClientQuery1 extends Client{
+public class ClientQuery1 extends Client<TripRowQ1, SortedSet<QueryOneFourResult>>{
+    private static final Integer QUERY_NUMBER = 1;
 
     public ClientQuery1(final String address, final String inPath, final String outPath){
-        super(address, inPath, outPath);
-        super.initializeHazelcast();
+        super(QUERY_NUMBER, address, inPath, outPath);
     }
 
     @Override
-    public int run(){
-        logger.info("Query 1 Client Starting ...");
-        try{
-            timesWriter.write("# Times of Query 1 \n");
-            // Job Tracker
-            JobTracker jobTracker = hazelcastInstance.getJobTracker("query-1");
+    KeyValueSource<Integer, TripRowQ1> loadData() throws IOException {
+        this.loadZonesData();
 
-            timesWriter.write("[INFO] Started Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            this.loadZonesData();
+        // now loading the data
+        IMap<Integer, TripRowQ1> tripsMap = hazelcastInstance.getMap("trips1");// key is PULocationId
+        KeyValueSource<Integer, TripRowQ1> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
+        final AtomicInteger tripsMapKey = new AtomicInteger();
+        try (Stream<String> lines = Files.lines( Path.of(inPath).resolve("trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+            lines.parallel().skip(1)
+                    .map(line -> line.split(";"))
+                    .filter(line -> {
+                        int puId = Integer.parseInt(line[4]);
+                        int doId = Integer.parseInt(line[5]);
 
-            // now loading the data
-            IMap<Integer, TripRowQ1> tripsMap = hazelcastInstance.getMap("trips");// key is PULocationId
-            KeyValueSource<Integer, TripRowQ1> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
-            final AtomicInteger tripsMapKey = new AtomicInteger();
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
-                lines.parallel().skip(1)
-                        .map(line -> line.split(";"))
-                        .filter(line -> {
-                            int puId = Integer.parseInt(line[4]);
-                            int doId = Integer.parseInt(line[5]);
-
-                            return (puId != doId) &&
-                                    (this.zonesMap.get(puId) != null) &&
-                                    (this.zonesMap.get(doId) != null);
-                        })
-                        .map(line -> new TripRowQ1(
-                                zonesMap.get(Integer.parseInt(line[4])).getZone(),
-                                zonesMap.get(Integer.parseInt(line[5])).getZone()
-                        ))
-                        .forEach(trip -> {
-                            Integer uniqueId = tripsMapKey.getAndIncrement();
-                            tripsMap.put(uniqueId, trip);
-                        });
-            }
-
-            timesWriter.write("[INFO] Finished Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            timesWriter.write("[INFO] Started Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-
-            Job<Integer, TripRowQ1> job = jobTracker.newJob(tripsKeyValueSource);
-            ICompletableFuture<SortedSet<QueryOneFourResult>> future = job
-                    .mapper(new StartEndPairMapper())
-                    .reducer(new StartEndPairReducerFactory())
-                    .submit(new QueryOneCollator());
-
-            // Process Data
-            SortedSet<QueryOneFourResult> results = future.get();
-
-            timesWriter.write("[INFO] Finished Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            timesWriter.write("[INFO] Started Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-
-            List<String> toPrint = new ArrayList<>();
-            // Add headers
-            toPrint.add("pickUpZone;dropOffZone;trips");
-            toPrint.addAll(results.stream().map(Objects::toString).toList());
-            this.printResults(toPrint);
-
-            timesWriter.write("[INFO] Finished Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-
-            timesWriter.close();
-        }catch ( Exception e ){
-            logger.error("Error in the execution of the query 1: {}", e.getLocalizedMessage());
-            return 1;
-        }finally{
-            finalizeHazelcast();
+                        return (puId != doId) &&
+                                (this.zonesMap.get(puId) != null) &&
+                                (this.zonesMap.get(doId) != null);
+                    })
+                    .map(line -> new TripRowQ1(
+                            zonesMap.get(Integer.parseInt(line[4])).getZone(),
+                            zonesMap.get(Integer.parseInt(line[5])).getZone()
+                    ))
+                    .forEach(trip -> {
+                        Integer uniqueId = tripsMapKey.getAndIncrement();
+                        tripsMap.put(uniqueId, trip);
+                    });
         }
 
-        return 0;
+        return tripsKeyValueSource;
     }
 
+    @Override
+    ICompletableFuture<SortedSet<QueryOneFourResult>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, TripRowQ1> keyValueSource) {
+        Job<Integer, TripRowQ1> job = jobTracker.newJob(keyValueSource);
+        ICompletableFuture<SortedSet<QueryOneFourResult>> future = job
+                .mapper(new StartEndPairMapper())
+                .reducer(new StartEndPairReducerFactory())
+                .submit(new QueryOneCollator());
+
+        return future;
+    }
+
+    @Override
+    void writeResults(SortedSet<QueryOneFourResult> results) throws IOException {
+        List<String> toPrint = new ArrayList<>();
+        // Add headers
+        toPrint.add("pickUpZone;dropOffZone;trips");
+        toPrint.addAll(results.stream().map(Objects::toString).toList());
+        this.printResults(toPrint);
+    }
 
     public static void main(String[] args){
-
         ClientQuery1 query1 = new ClientQuery1(System.getProperty("addresses"), System.getProperty("inPath"), System.getProperty("outPath"));
-
         query1.run();
-
     }
 }
