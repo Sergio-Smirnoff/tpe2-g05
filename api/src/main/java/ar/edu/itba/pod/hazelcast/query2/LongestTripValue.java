@@ -11,28 +11,32 @@ public class LongestTripValue implements DataSerializable, Comparable<LongestTri
 
     private double tripMiles;
     private LocalDateTime requestTime;
-    private String DOLocationID;
+    private String PULocation;
+    private String DOLocation;
     private String company;
 
     public LongestTripValue() {}
 
-    public LongestTripValue(double tripMiles, LocalDateTime requestTime, String DOLocationID, String company) {
+    public LongestTripValue(double tripMiles, LocalDateTime requestTime, String PULocation,String DOLocation, String company) {
         this.tripMiles = tripMiles;
         this.requestTime = requestTime;
-        this.DOLocationID = DOLocationID;
+        this.PULocation = PULocation;
+        this.DOLocation = DOLocation;
         this.company = company;
     }
 
     public double getTripMiles() { return tripMiles; }
     public LocalDateTime getRequestTime() { return requestTime; }
-    public String getDOLocationID() { return DOLocationID; }
+    public String getPULocation() { return PULocation; }
+    public String getDOLocation() { return DOLocation; }
     public String getCompany() { return company; }
 
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
         out.writeDouble(tripMiles);
         out.writeObject(requestTime); // LocalDateTime es serializable por defecto
-        out.writeUTF(DOLocationID);
+        out.writeUTF(PULocation);
+        out.writeUTF(DOLocation);
         out.writeUTF(company);
     }
 
@@ -40,7 +44,8 @@ public class LongestTripValue implements DataSerializable, Comparable<LongestTri
     public void readData(ObjectDataInput in) throws IOException {
         tripMiles = in.readDouble();
         requestTime = in.readObject();
-        DOLocationID = in.readUTF();
+        PULocation = in.readUTF();
+        DOLocation = in.readUTF();
         company = in.readUTF();
     }
 

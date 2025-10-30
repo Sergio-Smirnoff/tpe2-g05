@@ -13,38 +13,19 @@ import java.util.TreeSet;
 public class LongestTripCollator implements Collator<Map.Entry<Integer, LongestTripValue>, SortedSet<LongestTripResult>> {
 
 
-    private final HashMap<Integer, ZonesRow> zonesMap;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-
-    public LongestTripCollator(HashMap<Integer, ZonesRow> zonesMap) {
-        this.zonesMap = zonesMap;
-    }
 
     @Override
     public SortedSet<LongestTripResult> collate(Iterable<Map.Entry<Integer, LongestTripValue>> values) {
 
-        Map<Integer, ZonesRow> localZonesMap = new HashMap<>(this.zonesMap);
-
         SortedSet<LongestTripResult> results = new TreeSet<>();
 
         for (Map.Entry<Integer, LongestTripValue> entry : values) {
-            int PULocationID = entry.getKey();
             LongestTripValue maxTrip = entry.getValue();
 
-            // Evitar NullPointerException si una zona no existe
-            ZonesRow pickUpZoneRow = localZonesMap.get(PULocationID);
-            ZonesRow dropOffZoneRow = localZonesMap.get(maxTrip.getDOLocationID());
-
-            if (pickUpZoneRow == null || dropOffZoneRow == null) {
-                continue; // O loggear un warning
-            }
-
-            String pickUpZoneName = pickUpZoneRow.getZone();
-            String dropOffZoneName = dropOffZoneRow.getZone();
-
             LongestTripResult result = new LongestTripResult(
-                    pickUpZoneName,
-                    dropOffZoneName,
+                    maxTrip.getPULocation(),
+                    maxTrip.getDOLocation(),
                     maxTrip.getRequestTime().format(DATE_FORMATTER),
                     maxTrip.getTripMiles(),
                     maxTrip.getCompany()

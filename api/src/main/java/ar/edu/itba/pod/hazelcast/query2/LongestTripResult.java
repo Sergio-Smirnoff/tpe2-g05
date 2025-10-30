@@ -1,18 +1,18 @@
 package ar.edu.itba.pod.hazelcast.query2;
 
 
-public record LongestTripResult(String pickUpZone, String longestDOZone, String longestPUDateTime, double longestMiles, String longestCompany) implements Comparable<LongestTripResult> {
+public record LongestTripResult(String pickUpZone, String dropOffZone, String requestTime, double totalMiles, String company) implements Comparable<LongestTripResult> {
 
     @Override
     public String toString() {
-        String truncatedMiles = String.format("%.2f", Math.floor(longestMiles * 100) / 100);
+        String truncatedMiles = String.format("%.2f", Math.floor(totalMiles * 100) / 100);
 
         return String.format("%s;%s;%s;%s;%s",
                 pickUpZone,
-                longestDOZone,
-                longestPUDateTime,
+                dropOffZone,
+                requestTime,
                 truncatedMiles.replace(",", "."),
-                longestCompany);
+                company);
     }
 
     @Override
