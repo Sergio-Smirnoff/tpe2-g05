@@ -13,9 +13,9 @@ public class TotalMilesCollator implements Collator<Map.Entry<TotalMilesKey, Dou
 
         // --------------- SORT ----------------------
         List<Map.Entry<TotalMilesKey, Double>> ordered = StreamSupport.stream(iterable.spliterator(), false)
-                .sorted(Comparator.comparing((Map.Entry<TotalMilesKey, Double> e) -> e.getKey().company())
-                        .thenComparing(e -> e.getKey().year())
-                        .thenComparing(e -> e.getKey().month()))
+                .sorted(Comparator.comparing((Map.Entry<TotalMilesKey, Double> e) -> e.getKey().getCompany())
+                        .thenComparing(e -> e.getKey().getYear())
+                        .thenComparing(e -> e.getKey().getMonth()))
                 .toList();
 
         // ---------------- YTD SUM --------------------
@@ -26,14 +26,14 @@ public class TotalMilesCollator implements Collator<Map.Entry<TotalMilesKey, Dou
         List<TotalMilesResult> result = new ArrayList<>();
 
         for (Map.Entry<TotalMilesKey, Double> e : ordered) {
-            String actualCompany = e.getKey().company();
-            int actualYear = e.getKey().year();
+            String actualCompany = e.getKey().getCompany();
+            int actualYear = e.getKey().getYear();
             if(previousCompany == null || !previousCompany.equals(actualCompany) || previousYear != actualYear)
                 previousTotal = 0.0;
 
             double totalYTD = previousTotal + e.getValue();
             double truncatedValue = Math.floor(totalYTD * 100) / 100;
-            result.add(new TotalMilesResult(actualCompany, actualYear, e.getKey().month(), truncatedValue));
+            result.add(new TotalMilesResult(actualCompany, actualYear, e.getKey().getMonth(), truncatedValue));
 
             // Update previous values
             previousTotal = totalYTD;

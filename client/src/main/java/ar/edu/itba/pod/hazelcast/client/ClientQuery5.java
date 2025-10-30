@@ -15,11 +15,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ClientQuery5 extends Client {
@@ -37,13 +39,14 @@ public class ClientQuery5 extends Client {
             // Job Tracker
             JobTracker jobTracker = hazelcastInstance.getJobTracker("query-5");
 
+            logger.info("Started Loading Data");
             timesWriter.write("[INFO] Started Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
             IMap<Integer, TripRowQ5> tripsMap = hazelcastInstance.getMap("trips");
             KeyValueSource<Integer, TripRowQ5> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
             final AtomicInteger tripsMapKey = new AtomicInteger();
             try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
-                lines.parallel().skip(1)
+                lines.skip(1).parallel()
                         .map(line -> line.split(";"))
                         .map(line -> new TripRowQ5(
                                 line[0],
@@ -57,6 +60,7 @@ public class ClientQuery5 extends Client {
             }
 
             timesWriter.write("[INFO] Finished Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            logger.info("Started Querying Data");
             timesWriter.write("[INFO] Started Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
             Job<Integer, TripRowQ5> job = jobTracker.newJob(tripsKeyValueSource);
@@ -69,9 +73,12 @@ public class ClientQuery5 extends Client {
             List<TotalMilesResult> results = future.get();
 
             timesWriter.write("[INFO] Finished Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
+            logger.info("Started Writing Data");
             timesWriter.write("[INFO] Started Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
 
-            List<String> toPrint = results.stream().map(Objects::toString).toList();
+            LinkedList<String> toPrint = results.stream()
+                    .map(Objects::toString)
+                    .collect(Collectors.toCollection(LinkedList::new));
             toPrint.addFirst("company;year;month;milesYTD");
             this.printResults(toPrint);
 
