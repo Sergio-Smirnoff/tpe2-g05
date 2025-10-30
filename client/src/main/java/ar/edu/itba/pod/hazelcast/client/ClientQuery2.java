@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>> {
-    private static final Integer QUERY_NUMBER = 1;
+    private static final Integer QUERY_NUMBER = 2;
 
     private static final int OUTSIDE_NYC_ID = 265; // ID de "Outside of NYC"
 

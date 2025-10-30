@@ -15,6 +15,7 @@ public class TripRowQ2 extends TripRow {
     private String company;
     private LocalDateTime requestTime;
 
+    public TripRowQ2(){}
 
     public TripRowQ2(String PULocation, String DOLocation, double trip_miles, String company, LocalDateTime requestTime) {
         this.PULocation = PULocation;

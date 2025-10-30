@@ -12,4 +12,4 @@ fi
 
 MAIN_CLASS="ar.edu.itba.pod.hazelcast.client.$JAVA_RUN_CLASS"
 
-java $JAVA_OPTS -cp 'lib/jars/*'  $MAIN_CLASS $*
+java $JAVA_OPTS $* -cp 'lib/jars/*'  $MAIN_CLASS
