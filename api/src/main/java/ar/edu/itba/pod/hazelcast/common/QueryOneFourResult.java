@@ -6,3 +6,4 @@ public record QueryOneFourResult(String startZone, String endZone, Long amount) 
         return "%s;%s;%d".formatted(startZone,endZone,amount);
     }
 }
+

@@ -1,33 +1,18 @@
 package ar.edu.itba.pod.hazelcast.client;
 
 import ar.edu.itba.pod.hazelcast.common.QueryOneFourResult;
-import ar.edu.itba.pod.hazelcast.common.TripRow;
-import ar.edu.itba.pod.hazelcast.common.ZonesRow;
 import ar.edu.itba.pod.hazelcast.query1.*;
-import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.client.config.ClientConfig;
-import com.hazelcast.client.config.ClientNetworkConfig;
-import com.hazelcast.config.GroupConfig;
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ClientQuery1 extends Client{
@@ -58,14 +43,14 @@ public class ClientQuery1 extends Client{
                         .filter(line -> {
                             int puId = Integer.parseInt(line[4]);
                             int doId = Integer.parseInt(line[5]);
-                            if ( puId == doId )
-                                return false;
-                            return (this.zonesMap.get(puId) != null) && (this.zonesMap.get(doId) != null);
+
+                            return (puId != doId) &&
+                                    (this.zonesMap.get(puId) != null) &&
+                                    (this.zonesMap.get(doId) != null);
                         })
                         .map(line -> new TripRowQ1(
                                 zonesMap.get(Integer.parseInt(line[4])).getZone(),
-                                zonesMap.get(Integer.parseInt(line[5])).getZone(),
-                                Double.parseDouble(line[6])
+                                zonesMap.get(Integer.parseInt(line[5])).getZone()
                         ))
                         .forEach(trip -> {
                             Integer uniqueId = tripsMapKey.getAndIncrement();
