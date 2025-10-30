@@ -24,15 +24,14 @@ import java.util.stream.Stream;
 
 public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult>>{
     private static final Integer QUERY_NUMBER = 4;
-    public ClientQuery4(final String address, final String inPath, final String outPath){
+    private final String borough;
+    public ClientQuery4(final String address, final String inPath, final String outPath, final String borough){
         super(QUERY_NUMBER, address, inPath, outPath);
+        this.borough = borough;
     }
 
     @Override
     KeyValueSource<Integer, TripRowQ4> loadData() throws IOException {
-        // Args param for borough filtering
-        String borough = "Manhattan";
-
         this.loadZonesData();
 
         // now loading the data
@@ -81,9 +80,8 @@ public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult
     }
 
 
-    // todo falta lo de borough, no se como se hace :) de ultima despues lo veo - martu
     public static void main(String[] args){
-        ClientQuery4 query4 = new ClientQuery4(System.getProperty("addresses"), System.getProperty("inPath"), System.getProperty("outPath"));
+        ClientQuery4 query4 = new ClientQuery4(System.getProperty("addresses"), System.getProperty("inPath"), System.getProperty("outPath"), System.getProperty("borough"));
         query4.run();
     }
 }
