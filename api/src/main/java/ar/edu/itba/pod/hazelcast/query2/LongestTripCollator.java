@@ -10,17 +10,17 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class LongestTripCollator implements Collator<Map.Entry<Integer, LongestTripValue>, SortedSet<LongestTripResult>> {
+public class LongestTripCollator implements Collator<Map.Entry<String, LongestTripValue>, SortedSet<LongestTripResult>> {
 
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     @Override
-    public SortedSet<LongestTripResult> collate(Iterable<Map.Entry<Integer, LongestTripValue>> values) {
+    public SortedSet<LongestTripResult> collate(Iterable<Map.Entry<String, LongestTripValue>> values) {
 
         SortedSet<LongestTripResult> results = new TreeSet<>();
 
-        for (Map.Entry<Integer, LongestTripValue> entry : values) {
+        for (Map.Entry<String, LongestTripValue> entry : values) {
             LongestTripValue maxTrip = entry.getValue();
 
             LongestTripResult result = new LongestTripResult(

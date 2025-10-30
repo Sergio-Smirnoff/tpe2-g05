@@ -46,8 +46,8 @@ public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>>
                     })
                     .map(line -> new TripRowQ2(
                         // Creamos el DTO optimizado para Q2
-                        line[4], // PULocationID
-                        line[5], // DOLocationID
+                        zonesMap.get(Integer.parseInt(line[4])).getZone(), // PULocation
+                        zonesMap.get(Integer.parseInt(line[5])).getZone(), // DOLocation
                         Double.parseDouble(line[6]), // trip_miles
                         line[0],                    // company
                         LocalDateTime.parse(line[1], dateTimeFormatter) // request_datetime
@@ -79,9 +79,9 @@ public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>>
         ICompletableFuture<SortedSet<LongestTripResult>> future = job
                 .mapper(new LongestTripMapper())
                 .reducer(new LongestTripReducerFactory())
-                .submit(new LongestTripCollator(this.zonesMap));
+                .submit(new LongestTripCollator());
 
-        return future;;
+        return future;
     }
 
     public static void main(String[] args) {
