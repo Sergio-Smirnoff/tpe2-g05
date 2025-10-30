@@ -8,88 +8,76 @@ import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 import ar.edu.itba.pod.hazelcast.common.*;
+
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class ClientQuery3 extends Client{
+public class ClientQuery3 extends Client<TripRowQ3, List<AvgPriceBoroughCompany>>{
+    private static final Integer QUERY_NUMBER = 3;
 
     public ClientQuery3(final String address, final String inPath, final String outPath){
-        super(address, inPath, outPath);
-        super.initializeHazelcast();
+        super(QUERY_NUMBER, address, inPath, outPath);
+    }
+
+
+    @Override
+    KeyValueSource<Integer, TripRowQ3> loadData() throws IOException {
+        this.loadZonesData();
+
+        // now loading the data
+        IMap<Integer, TripRowQ3> tripsMap = hazelcastInstance.getMap("trips");// key is PULocationId
+        KeyValueSource<Integer, TripRowQ3> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
+        final AtomicInteger tripsMapKey = new AtomicInteger();
+        try (Stream<String> lines = Files.lines(Path.of(inPath).resolve("trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+            lines.parallel().skip(1)
+                    .map(line -> line.split(";"))
+                    .filter(line -> {
+                        ZonesRow pu = this.zonesMap.get(Integer.parseInt(line[4]));
+                        if ( pu == null )
+                            return false;
+                        String aux = pu.getZone();
+                        return !aux.equals("Outside of NYC");
+                    })
+                    .map(line -> new TripRowQ3(
+                            zonesMap.get(Integer.parseInt(line[4])).getBorough(), // borough
+                            line[0],
+                            Double.parseDouble(line[7])
+                    ))
+                    .forEach(trip -> {
+                        Integer uniqueId = tripsMapKey.getAndIncrement();
+                        tripsMap.put(uniqueId, trip);
+                    });
+        }
+
+        return tripsKeyValueSource;
     }
 
     @Override
-    public int run(){
-        try{
-            logger.info("======== Started executing query 3 ========");
-            timesWriter.write("# Times of Query 3 \n");
-            timesWriter.write("[INFO] Started Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            this.loadZonesData();
+    ICompletableFuture<List<AvgPriceBoroughCompany>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, TripRowQ3> keyValueSource) {
+        Job<Integer, TripRowQ3> job = jobTracker.newJob(keyValueSource);
+        ICompletableFuture<List<AvgPriceBoroughCompany>> future = job
+                .mapper(new PriceAvgMapper())
+                .reducer(new PickupCompanyPairReducerFactory())
+                .submit(new Query3Collator());
 
-            // now loading the data
-            IMap<Integer, TripRowQ3> tripsMap = hazelcastInstance.getMap("trips");// key is PULocationId
-            KeyValueSource<Integer, TripRowQ3> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
-            final AtomicInteger tripsMapKey = new AtomicInteger();
-            try (Stream<String> lines = Files.lines(Paths.get("client/src/main/assembly/overlay/trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
-                lines.parallel().skip(1)
-                        .map(line -> line.split(";"))
-                        .filter(line -> {
-                            ZonesRow pu = this.zonesMap.get(Integer.parseInt(line[4]));
-                            if ( pu == null )
-                                return false;
-                            String aux = pu.getZone();
-                            return !aux.equals("Outside of NYC");
-                        })
-                        .map(line -> new TripRowQ3(
-                                zonesMap.get(Integer.parseInt(line[4])).getBorough(), // borough
-                                line[0],
-                                Double.parseDouble(line[7])
-                        ))
-                        .forEach(trip -> {
-                            Integer uniqueId = tripsMapKey.getAndIncrement();
-                            tripsMap.put(uniqueId, trip);
-                        });
-            }
-
-            timesWriter.write("[INFO] Finished Loading Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            timesWriter.write("[INFO] Started Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-
-            JobTracker jobTracker = hazelcastInstance.getJobTracker("avgPriceByZoneAndComp");
-
-            // Map Reduce Job
-            Job<Integer, TripRowQ3> job = jobTracker.newJob(tripsKeyValueSource);
-            ICompletableFuture<List<AvgPriceBoroughCompany>> future = job
-                    .mapper(new PriceAvgMapper())
-                    .reducer(new PickupCompanyPairReducerFactory())
-                    .submit(new Query3Collator());
-
-            // Process Data
-            List<AvgPriceBoroughCompany> result = future.get();
-
-            timesWriter.write("[INFO] Finished Querying Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            timesWriter.write("[INFO] Started Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-
-            List<String> toPrint = new ArrayList<>();
-            toPrint.add("pickUpBorough;company;avgFare");
-            toPrint.addAll(result.stream().map(Objects::toString).toList());
-            this.printResults(toPrint);
-
-            timesWriter.write("[INFO] Finished Writing Data: " + LocalDateTime.now().format(dateTimeFormatter) + "\n");
-            timesWriter.close();
-
-        } catch (Exception e) {
-            logger.error("Error occurred running query 3: {}", e.getLocalizedMessage());
-            return 1;
-        }finally {
-            finalizeHazelcast();
-        }
-        return 0;
+        return future;
     }
+
+    @Override
+    void writeResults(List<AvgPriceBoroughCompany> results) throws IOException {
+        List<String> toPrint = new ArrayList<>();
+        toPrint.add("pickUpBorough;company;avgFare");
+        toPrint.addAll(results.stream().map(Objects::toString).toList());
+        this.printResults(toPrint);
+    }
+
 
     public static void main(String[] args) {
         ClientQuery3 clientQuery3 = new ClientQuery3(System.getProperty("addresses"), System.getProperty("inPath"), System.getProperty("outPath"));
