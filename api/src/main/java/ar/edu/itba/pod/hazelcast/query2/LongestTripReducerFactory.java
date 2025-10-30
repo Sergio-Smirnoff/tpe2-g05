@@ -4,10 +4,10 @@ package ar.edu.itba.pod.hazelcast.query2;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
-public class LongestTripReducerFactory implements ReducerFactory<Integer, LongestTripValue, LongestTripValue> {
+public class LongestTripReducerFactory implements ReducerFactory<String, LongestTripValue, LongestTripValue> {
 
     @Override
-    public Reducer<LongestTripValue, LongestTripValue> newReducer(Integer key) {
+    public Reducer<LongestTripValue, LongestTripValue> newReducer(String key) {
         // La 'key' es el PULocationID
         return new LongestTripReducer();
     }

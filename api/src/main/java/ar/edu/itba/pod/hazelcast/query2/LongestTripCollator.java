@@ -13,10 +13,10 @@ import java.util.TreeSet;
 public class LongestTripCollator implements Collator<Map.Entry<Integer, LongestTripValue>, SortedSet<LongestTripResult>> {
 
 
-    private final IMap<Integer, ZonesRow> zonesMap;
+    private final HashMap<Integer, ZonesRow> zonesMap;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-    public LongestTripCollator(IMap<Integer, ZonesRow> zonesMap) {
+    public LongestTripCollator(HashMap<Integer, ZonesRow> zonesMap) {
         this.zonesMap = zonesMap;
     }
 
