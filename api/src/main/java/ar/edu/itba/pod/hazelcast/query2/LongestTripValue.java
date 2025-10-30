@@ -11,12 +11,12 @@ public class LongestTripValue implements DataSerializable, Comparable<LongestTri
 
     private double tripMiles;
     private LocalDateTime requestTime;
-    private int DOLocationID;
+    private String DOLocationID;
     private String company;
 
     public LongestTripValue() {}
 
-    public LongestTripValue(double tripMiles, LocalDateTime requestTime, int DOLocationID, String company) {
+    public LongestTripValue(double tripMiles, LocalDateTime requestTime, String DOLocationID, String company) {
         this.tripMiles = tripMiles;
         this.requestTime = requestTime;
         this.DOLocationID = DOLocationID;
@@ -25,14 +25,14 @@ public class LongestTripValue implements DataSerializable, Comparable<LongestTri
 
     public double getTripMiles() { return tripMiles; }
     public LocalDateTime getRequestTime() { return requestTime; }
-    public int getDOLocationID() { return DOLocationID; }
+    public String getDOLocationID() { return DOLocationID; }
     public String getCompany() { return company; }
 
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
         out.writeDouble(tripMiles);
         out.writeObject(requestTime); // LocalDateTime es serializable por defecto
-        out.writeInt(DOLocationID);
+        out.writeUTF(DOLocationID);
         out.writeUTF(company);
     }
 
@@ -40,7 +40,7 @@ public class LongestTripValue implements DataSerializable, Comparable<LongestTri
     public void readData(ObjectDataInput in) throws IOException {
         tripMiles = in.readDouble();
         requestTime = in.readObject();
-        DOLocationID = in.readInt();
+        DOLocationID = in.readUTF();
         company = in.readUTF();
     }
 
