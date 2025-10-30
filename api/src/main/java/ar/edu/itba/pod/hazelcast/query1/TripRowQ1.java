@@ -10,15 +10,13 @@ public class TripRowQ1 extends TripRow {
 
     private String PULocation;
     private String DOLocation;
-    private double trip_miles;
 
 
     public TripRowQ1(){}
 
-    public TripRowQ1(String PULocation, String DOLocation, double trip_miles) {
+    public TripRowQ1(String PULocation, String DOLocation) {
         this.PULocation = PULocation;
         this.DOLocation = DOLocation;
-        this.trip_miles = trip_miles;
     }
 
     public String getPULocation() {
@@ -29,21 +27,16 @@ public class TripRowQ1 extends TripRow {
         return DOLocation;
     }
 
-    public double getTrip_miles() {
-        return trip_miles;
-    }
 
     @Override
     public void readData(ObjectDataInput objectDataInput) throws IOException {
         PULocation = objectDataInput.readUTF();
         DOLocation = objectDataInput.readUTF();
-        trip_miles = objectDataInput.readDouble();
     }
 
     @Override
     public void writeData(ObjectDataOutput objectDataOutput) throws IOException {
         objectDataOutput.writeUTF(PULocation);
         objectDataOutput.writeUTF(DOLocation);
-        objectDataOutput.writeDouble(trip_miles);
     }
 }

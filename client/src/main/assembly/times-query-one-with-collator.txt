@@ -1,5 +1,0 @@
-### Times of Query 1 ###
-[INFO] Start Data Loading: 2025-10-28 15:17:32
-[INFO] End Data Loading: 2025-10-28 15:17:55
-[INFO] Start Map Reduce Job: 2025-10-28 15:17:55
-[INFO] End Map Reduce Job: 2025-10-28 15:18:10

@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.hazelcast.common;
+package ar.edu.itba.pod.hazelcast.query4;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
@@ -8,15 +8,15 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-public class TripRowQuery4 implements DataSerializable {
+public class TripRowQ4 implements DataSerializable {
     private LocalDateTime requestTime;
     private LocalDateTime pickupTime;
     private String PUZone;
     private String DOZone;
 
-    public TripRowQuery4(){}
+    public TripRowQ4(){}
 
-    public TripRowQuery4(
+    public TripRowQ4(
             LocalDateTime request_time,
             LocalDateTime pickup_time,
             String PUZone,
