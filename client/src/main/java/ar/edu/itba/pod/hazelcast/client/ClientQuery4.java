@@ -1,11 +1,8 @@
 package ar.edu.itba.pod.hazelcast.client;
 
 import ar.edu.itba.pod.hazelcast.common.QueryOneFourResult;
-import ar.edu.itba.pod.hazelcast.query4.TripRowQ4;
+import ar.edu.itba.pod.hazelcast.query4.*;
 import ar.edu.itba.pod.hazelcast.common.ZonesRow;
-import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneCollator;
-import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneMapper;
-import ar.edu.itba.pod.hazelcast.query4.DelayPerBoroughZoneReducerFactory;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Job;
@@ -65,6 +62,7 @@ public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult
         Job<Integer, TripRowQ4> job = jobTracker.newJob(keyValueSource);
         ICompletableFuture<SortedSet<QueryOneFourResult>> future = job
                 .mapper(new DelayPerBoroughZoneMapper())
+                .combiner(new DelayPerBoroughZoneCombinerFactory())
                 .reducer(new DelayPerBoroughZoneReducerFactory())
                 .submit(new DelayPerBoroughZoneCollator());
 
