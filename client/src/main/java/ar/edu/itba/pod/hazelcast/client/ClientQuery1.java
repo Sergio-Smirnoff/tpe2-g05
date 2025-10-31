@@ -62,6 +62,7 @@ public class ClientQuery1 extends Client<TripRowQ1, SortedSet<QueryOneFourResult
         Job<Integer, TripRowQ1> job = jobTracker.newJob(keyValueSource);
         ICompletableFuture<SortedSet<QueryOneFourResult>> future = job
                 .mapper(new StartEndPairMapper())
+                .combiner(new StartEndPairCombinerFactory())
                 .reducer(new StartEndPairReducerFactory())
                 .submit(new QueryOneCollator());
 

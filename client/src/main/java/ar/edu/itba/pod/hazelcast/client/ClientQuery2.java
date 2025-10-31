@@ -78,6 +78,7 @@ public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>>
         Job<Integer, TripRowQ2> job = jobTracker.newJob(keyValueSource);
         ICompletableFuture<SortedSet<LongestTripResult>> future = job
                 .mapper(new LongestTripMapper())
+                .combiner(new LongestTripCombinerFactory())
                 .reducer(new LongestTripReducerFactory())
                 .submit(new LongestTripCollator());
 
