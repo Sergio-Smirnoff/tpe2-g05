@@ -30,7 +30,7 @@ public class QueryFourTest {
 
             try (Statement stmt = h2Connection.createStatement()) {
 
-                String tripsResourcePath = "/trips-2025-01-mini.csv";
+                String tripsResourcePath = "/trips.csv";
                 URL tripsUrl = QueryFourTest.class.getResource(tripsResourcePath);
                 URL zonesUrl = QueryFourTest.class.getResource("/zones.csv");
 

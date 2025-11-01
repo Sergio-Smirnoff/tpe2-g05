@@ -25,20 +25,25 @@ import java.util.stream.Stream;
 
 
 abstract class Client<T, K> {
+
+    protected final Integer clientNumber;
+    protected final String address;
+    protected final String inPath;
+    protected final String outPath;
+
+    protected HazelcastInstance hazelcastInstance;
+    // Mapa en memoria de zones para optimizar la carga de datos y reducir tráfico de red
+    protected HashMap<Integer, ZonesRow> zonesMap = new HashMap<>();
+
     private static final Logger logger = Logger.getLogger(Client.class.getName());
     private static final Logger timeLogger = Logger.getLogger("timeLogger");
 
-    protected Integer clientNumber;
-    protected String address;
-    protected String inPath;
-    protected String outPath;
+    private static final String GROUP_NAME = "g05-hazelcast";
+    private static final String GROUP_PASS = "g05-hazelcast-pass";
 
-    protected HazelcastInstance hazelcastInstance;
-
-    // TODO Porque un HashMap y no un mapa de hazelcast???? (no sirve en distribuido, es mapa en memoria del nodo cliente)
-    protected HashMap<Integer, ZonesRow> zonesMap = new HashMap<>();
-
-    protected final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    protected static final String TRIPS_PATH = "trips.csv";
+    protected static final String ZONES_PATH = "zones.csv";
+    protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public Client(Integer clientNumber, String address, String inPath, String outPath){
         this.clientNumber = clientNumber;
@@ -76,11 +81,11 @@ abstract class Client<T, K> {
     abstract void writeResults(K results) throws IOException;
 
     public void run(){
-        logger.info("Query-" + clientNumber + " Client Starting ...");
+        logger.info("Query-" + clientNumber + ": Cliente iniciando ...");
 
         try {
             // Group Config
-            GroupConfig groupConfig = new GroupConfig().setName("g05-hazelcast").setPassword("g05-hazelcast-pass");
+            GroupConfig groupConfig = new GroupConfig().setName(GROUP_NAME).setPassword(GROUP_PASS);
 
             // Client Network Config
             ClientNetworkConfig clientNetworkConfig = new ClientNetworkConfig();
@@ -107,16 +112,16 @@ abstract class Client<T, K> {
             writeResults(results);
 
             timeLogger.info("Fin del trabajo map/reduce");
-        } catch ( Exception e ){
+        } catch ( Exception e ) {
             logger.log(Level.SEVERE, "Error en la ejecución", e);
-        } finally{
+        } finally {
             HazelcastClient.shutdownAll();
         }
 
     }
 
     protected void loadZonesData() throws IOException {
-        try (Stream<String> lines = Files.lines(Paths.get(Path.of(inPath).resolve("zones.csv").toString()), StandardCharsets.UTF_8)) {
+        try (Stream<String> lines = Files.lines(Paths.get(Path.of(inPath).resolve(ZONES_PATH).toString()), StandardCharsets.UTF_8)) {
             lines.skip(1)
                     .map(line -> line.split(";"))
                     .map(line -> new ZonesRow(
@@ -132,7 +137,7 @@ abstract class Client<T, K> {
         try {
             Files.write(Path.of(outPath).resolve("query" + clientNumber + ".csv"), toPrintList, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error writing the file {}:", e);
+            logger.log(Level.SEVERE, "Error escribiendo los resultados", e);
         }
     }
 }

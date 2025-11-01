@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,6 +21,7 @@ import java.util.stream.Stream;
 public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult>>{
     private static final Integer QUERY_NUMBER = 4;
     private final String borough;
+
     public ClientQuery4(final String address, final String inPath, final String outPath, final String borough){
         super(QUERY_NUMBER, address, inPath, outPath);
         this.borough = borough;
@@ -32,10 +32,10 @@ public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult
         this.loadZonesData();
 
         // now loading the data
-        IMap<Integer, TripRowQ4> tripsMap = hazelcastInstance.getMap("trips4");// key is PULocationId
+        IMap<Integer, TripRowQ4> tripsMap = hazelcastInstance.getMap("trips-" + QUERY_NUMBER);// key is PULocationId
         KeyValueSource<Integer, TripRowQ4> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
         final AtomicInteger tripsMapKey = new AtomicInteger();
-        try (Stream<String> lines = Files.lines(Path.of(inPath).resolve("trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+        try (Stream<String> lines = Files.lines(Path.of(inPath).resolve(TRIPS_PATH), StandardCharsets.UTF_8)) {
             lines.skip(1)
                     .map(line -> line.split(";"))
                     .filter(line ->{
@@ -45,8 +45,8 @@ public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult
                         return PUZoneRow != null && DOZoneRow != null && PUZoneRow.getBorough().compareTo(borough) == 0;
                     })
                     .map(line -> new TripRowQ4(
-                            LocalDateTime.parse(line[1], dateTimeFormatter),
-                            LocalDateTime.parse(line[2], dateTimeFormatter),
+                            LocalDateTime.parse(line[1], DATE_TIME_FORMATTER),
+                            LocalDateTime.parse(line[2], DATE_TIME_FORMATTER),
                             zonesMap.get(Integer.parseInt(line[4])).getZone(),
                             zonesMap.get(Integer.parseInt(line[5])).getZone()
                     ))
@@ -58,18 +58,15 @@ public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult
 
     @Override
     ICompletableFuture<SortedSet<QueryOneFourResult>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, TripRowQ4> keyValueSource) {
-        Job<Integer, TripRowQ4> job = jobTracker.newJob(keyValueSource);
-        ICompletableFuture<SortedSet<QueryOneFourResult>> future = job
+        return jobTracker.newJob(keyValueSource)
                 .mapper(new DelayPerBoroughZoneMapper())
                 .combiner(new DelayPerBoroughZoneCombinerFactory())
                 .reducer(new DelayPerBoroughZoneReducerFactory())
                 .submit(new DelayPerBoroughZoneCollator());
-
-        return future;
     }
 
     @Override
-    void writeResults(SortedSet<QueryOneFourResult> results) throws IOException {
+    void writeResults(SortedSet<QueryOneFourResult> results) {
         List<String> toPrint = new ArrayList<>();
         // Add headers
         toPrint.add("pickUpZone;dropOffZone;delayInSeconds");

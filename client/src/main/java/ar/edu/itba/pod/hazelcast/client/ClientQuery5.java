@@ -1,7 +1,6 @@
 package ar.edu.itba.pod.hazelcast.client;
 
 import ar.edu.itba.pod.hazelcast.query5.*;
-import ar.edu.itba.pod.hazelcast.query5.objects.TotalMilesKey;
 import ar.edu.itba.pod.hazelcast.query5.objects.TotalMilesResult;
 import ar.edu.itba.pod.hazelcast.query5.objects.TripRowQ5;
 import com.hazelcast.core.ICompletableFuture;
@@ -14,12 +13,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ClientQuery5 extends Client<TripRowQ5, List<TotalMilesResult>> {
@@ -31,16 +27,16 @@ public class ClientQuery5 extends Client<TripRowQ5, List<TotalMilesResult>> {
 
     @Override
     KeyValueSource<Integer, TripRowQ5> loadData() throws IOException {
-        IMap<Integer, TripRowQ5> tripsMap = hazelcastInstance.getMap("trips5");
+        IMap<Integer, TripRowQ5> tripsMap = hazelcastInstance.getMap("trips-" + QUERY_NUMBER);
         KeyValueSource<Integer, TripRowQ5> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
 
         final AtomicInteger tripsMapKey = new AtomicInteger();
-        try (Stream<String> lines = Files.lines(Path.of(inPath).resolve("trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+        try (Stream<String> lines = Files.lines(Path.of(inPath).resolve(TRIPS_PATH), StandardCharsets.UTF_8)) {
             lines.skip(1).parallel()
                     .map(line -> line.split(";"))
                     .map(line -> new TripRowQ5(
                             line[0],
-                            LocalDateTime.parse(line[1], dateTimeFormatter),
+                            LocalDateTime.parse(line[1], DATE_TIME_FORMATTER),
                             Double.parseDouble(line[6])
                     ))
                     .forEach(trip -> {
@@ -54,18 +50,15 @@ public class ClientQuery5 extends Client<TripRowQ5, List<TotalMilesResult>> {
 
     @Override
     ICompletableFuture<List<TotalMilesResult>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, TripRowQ5> keyValueSource) {
-        Job<Integer, TripRowQ5> job = jobTracker.newJob(keyValueSource);
-        ICompletableFuture<List<TotalMilesResult>> future = job
+        return jobTracker.newJob(keyValueSource)
                 .mapper(new TotalMilesMapper())
                 .combiner(new TotalMilesCombinerFactory())
                 .reducer(new TotalMilesReducerFactory())
                 .submit(new TotalMilesCollator());
-
-        return future;
     }
 
     @Override
-    void writeResults(List<TotalMilesResult> results) throws IOException {
+    void writeResults(List<TotalMilesResult> results) {
         List<String> toPrint = new ArrayList<>();
         toPrint.add("company;year;month;milesYTD");
         toPrint.addAll(results.stream().map(Objects::toString).toList());

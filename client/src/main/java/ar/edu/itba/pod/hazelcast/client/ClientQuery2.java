@@ -1,6 +1,5 @@
 package ar.edu.itba.pod.hazelcast.client;
 
-import ar.edu.itba.pod.hazelcast.common.ZonesRow;
 import ar.edu.itba.pod.hazelcast.query2.*;
 
 import com.hazelcast.core.ICompletableFuture;
@@ -13,7 +12,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,10 +31,10 @@ public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>>
         this.loadZonesData();
 
         // now loading the data
-        IMap<Integer, TripRowQ2> tripsMap = hazelcastInstance.getMap("trips2");// key is PULocationId
+        IMap<Integer, TripRowQ2> tripsMap = hazelcastInstance.getMap("trips-" + QUERY_NUMBER);// key is PULocationId
         KeyValueSource<Integer, TripRowQ2> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
         final AtomicInteger tripsMapKey = new AtomicInteger();
-        try (Stream<String> lines = Files.lines(Path.of(inPath).resolve("trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+        try (Stream<String> lines = Files.lines(Path.of(inPath).resolve(TRIPS_PATH), StandardCharsets.UTF_8)) {
             lines.parallel().skip(1)
                     .map(line -> line.split(";"))
                     .filter(line -> {
@@ -50,7 +48,7 @@ public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>>
                         zonesMap.get(Integer.parseInt(line[5])).getZone(), // DOLocation
                         Double.parseDouble(line[6]), // trip_miles
                         line[0],                    // company
-                        LocalDateTime.parse(line[1], dateTimeFormatter) // request_datetime
+                        LocalDateTime.parse(line[1], DATE_TIME_FORMATTER) // request_datetime
                     ))
                     .forEach(trip -> {
                         Integer uniqueId = tripsMapKey.getAndIncrement();
@@ -62,27 +60,21 @@ public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>>
     }
 
     @Override
-    void writeResults(SortedSet<LongestTripResult> results) throws IOException {
+    void writeResults(SortedSet<LongestTripResult> results)  {
         List<String> toPrint = new ArrayList<>();
         // Header de Query 2
         toPrint.add("pickUpZone;longestDOZone;longestPUDateTime;longestMiles;longestCompany");
-
-        // Query2Result.toString()
         toPrint.addAll(results.stream().map(Objects::toString).toList());
-
         this.printResults(toPrint);
     }
 
     @Override
-    ICompletableFuture<SortedSet<LongestTripResult>> executeMapReduce(JobTracker jobTracker, KeyValueSource keyValueSource) {
-        Job<Integer, TripRowQ2> job = jobTracker.newJob(keyValueSource);
-        ICompletableFuture<SortedSet<LongestTripResult>> future = job
+    ICompletableFuture<SortedSet<LongestTripResult>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, TripRowQ2> keyValueSource) {
+        return jobTracker.newJob(keyValueSource)
                 .mapper(new LongestTripMapper())
                 .combiner(new LongestTripCombinerFactory())
                 .reducer(new LongestTripReducerFactory())
                 .submit(new LongestTripCollator());
-
-        return future;
     }
 
     public static void main(String[] args) {

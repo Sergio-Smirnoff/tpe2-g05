@@ -26,16 +26,16 @@ public class ClientQuery3 extends Client<TripRowQ3, List<AvgPriceBoroughCompany>
         super(QUERY_NUMBER, address, inPath, outPath);
     }
 
-
     @Override
     KeyValueSource<Integer, TripRowQ3> loadData() throws IOException {
         this.loadZonesData();
 
         // now loading the data
-        IMap<Integer, TripRowQ3> tripsMap = hazelcastInstance.getMap("trips3");// key is PULocationId
+        IMap<Integer, TripRowQ3> tripsMap = hazelcastInstance.getMap("trips-" + QUERY_NUMBER);// key is PULocationId
         KeyValueSource<Integer, TripRowQ3> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
+
         final AtomicInteger tripsMapKey = new AtomicInteger();
-        try (Stream<String> lines = Files.lines(Path.of(inPath).resolve("trips-2025-01-mini.csv"), StandardCharsets.UTF_8)) {
+        try (Stream<String> lines = Files.lines(Path.of(inPath).resolve(TRIPS_PATH), StandardCharsets.UTF_8)) {
             lines.parallel().skip(1)
                     .map(line -> line.split(";"))
                     .filter(line -> {
@@ -61,17 +61,14 @@ public class ClientQuery3 extends Client<TripRowQ3, List<AvgPriceBoroughCompany>
 
     @Override
     ICompletableFuture<List<AvgPriceBoroughCompany>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, TripRowQ3> keyValueSource) {
-        Job<Integer, TripRowQ3> job = jobTracker.newJob(keyValueSource);
-        ICompletableFuture<List<AvgPriceBoroughCompany>> future = job
+        return jobTracker.newJob(keyValueSource)
                 .mapper(new PriceAvgMapper())
                 .reducer(new PickupCompanyPairReducerFactory())
                 .submit(new Query3Collator());
-
-        return future;
     }
 
     @Override
-    void writeResults(List<AvgPriceBoroughCompany> results) throws IOException {
+    void writeResults(List<AvgPriceBoroughCompany> results)  {
         List<String> toPrint = new ArrayList<>();
         toPrint.add("pickUpBorough;company;avgFare");
         toPrint.addAll(results.stream().map(Objects::toString).toList());
