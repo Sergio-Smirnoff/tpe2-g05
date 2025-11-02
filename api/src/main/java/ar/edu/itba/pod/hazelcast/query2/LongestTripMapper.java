@@ -22,7 +22,6 @@ public class LongestTripMapper implements Mapper<Integer, TripRowQ2, String, Lon
 
         context.emit(tripRow.getPULocation(), new LongestTripValue(tripRow.getTrip_miles(),
                 tripRow.getRequestTime(),
-                tripRow.getPULocation(),
                 tripRow.getDOLocation(),
                 tripRow.getCompany()));
     }

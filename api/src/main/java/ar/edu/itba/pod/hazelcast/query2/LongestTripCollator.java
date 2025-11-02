@@ -21,10 +21,11 @@ public class LongestTripCollator implements Collator<Map.Entry<String, LongestTr
         SortedSet<LongestTripResult> results = new TreeSet<>();
 
         for (Map.Entry<String, LongestTripValue> entry : values) {
+            String PULocation = entry.getKey();
             LongestTripValue maxTrip = entry.getValue();
 
             LongestTripResult result = new LongestTripResult(
-                    maxTrip.getPULocation(),
+                    PULocation,
                     maxTrip.getDOLocation(),
                     maxTrip.getRequestTime().format(DATE_FORMATTER),
                     maxTrip.getTripMiles(),
