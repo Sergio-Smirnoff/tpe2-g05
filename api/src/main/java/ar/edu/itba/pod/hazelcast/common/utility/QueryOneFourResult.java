@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.hazelcast.common;
+package ar.edu.itba.pod.hazelcast.common.utility;
 
 public record QueryOneFourResult(String startZone, String endZone, Long amount) {
     @Override

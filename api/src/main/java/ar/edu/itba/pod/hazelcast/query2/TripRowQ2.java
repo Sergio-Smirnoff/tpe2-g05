@@ -3,11 +3,12 @@ package ar.edu.itba.pod.hazelcast.query2;
 import ar.edu.itba.pod.hazelcast.common.TripRow;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.DataSerializable;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class TripRowQ2 extends TripRow {
+public class TripRowQ2 implements DataSerializable {
 
     private String PULocation;
     private String DOLocation;

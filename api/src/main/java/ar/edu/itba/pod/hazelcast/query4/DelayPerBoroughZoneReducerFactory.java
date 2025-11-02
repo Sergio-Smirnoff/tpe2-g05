@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.hazelcast.query4;
 
-import ar.edu.itba.pod.hazelcast.common.Pair;
+import ar.edu.itba.pod.hazelcast.common.utility.Pair;
+import ar.edu.itba.pod.hazelcast.common.utility.Utils;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
@@ -16,19 +17,7 @@ public class DelayPerBoroughZoneReducerFactory implements ReducerFactory<String,
 
         @Override
         public void reduce(Pair<String, Long> current) {
-
-            long currentDelay = current.getRight();
-            String currentZone = current.getLeft();
-            long maxDelay = longestDelayPair.getRight();
-            String maxZone = longestDelayPair.getLeft();
-
-            if (currentDelay > maxDelay) {
-                longestDelayPair = new Pair<>(currentZone, currentDelay);
-            } else if (currentDelay == maxDelay) {
-                if (currentZone.compareTo(maxZone) < 0) {
-                    longestDelayPair = new Pair<>(currentZone, currentDelay);
-                }
-            }
+            this.longestDelayPair = Utils.getLongerDelay(this.longestDelayPair, current);
         }
 
         @Override

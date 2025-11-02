@@ -3,10 +3,11 @@ package ar.edu.itba.pod.hazelcast.query3;
 import ar.edu.itba.pod.hazelcast.common.TripRow;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.DataSerializable;
 
 import java.io.IOException;
 
-public class TripRowQ3 extends TripRow {
+public class TripRowQ3 implements DataSerializable {
 
     private String borough;
     private String company;

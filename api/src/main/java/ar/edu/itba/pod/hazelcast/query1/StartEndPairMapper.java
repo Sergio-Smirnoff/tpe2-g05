@@ -1,6 +1,6 @@
 package ar.edu.itba.pod.hazelcast.query1;
 
-import ar.edu.itba.pod.hazelcast.common.Pair;
+import ar.edu.itba.pod.hazelcast.common.utility.Pair;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
 

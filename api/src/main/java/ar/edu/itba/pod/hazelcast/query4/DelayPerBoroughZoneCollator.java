@@ -1,7 +1,7 @@
 package ar.edu.itba.pod.hazelcast.query4;
 
-import ar.edu.itba.pod.hazelcast.common.Pair;
-import ar.edu.itba.pod.hazelcast.common.QueryOneFourResult;
+import ar.edu.itba.pod.hazelcast.common.utility.Pair;
+import ar.edu.itba.pod.hazelcast.common.utility.QueryOneFourResult;
 import com.hazelcast.mapreduce.Collator;
 
 import java.util.Comparator;

@@ -1,6 +1,6 @@
 package ar.edu.itba.pod.hazelcast.query1;
 
-import ar.edu.itba.pod.hazelcast.common.Pair;
+import ar.edu.itba.pod.hazelcast.common.utility.Pair;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
@@ -10,7 +10,7 @@ public class StartEndPairReducerFactory implements ReducerFactory<Pair<String, S
         return new StartEndPairReducer();
     }
 
-    private class StartEndPairReducer extends Reducer<Long, Long>{
+    private static class StartEndPairReducer extends Reducer<Long, Long>{
         private long sum = 0L;
 
         @Override

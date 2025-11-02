@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.hazelcast.common;
+package ar.edu.itba.pod.hazelcast.common.utility;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
