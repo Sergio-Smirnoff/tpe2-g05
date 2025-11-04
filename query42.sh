@@ -1,6 +1,6 @@
-#!/bin/bash
+query3.sh#!/bin/bash
 
-export JAVA_RUN_CLASS="Server"
+export JAVA_RUN_CLASS="ClientQuery42"
 
 # Verificar que las clases estén compiladas
 if [ ! -d "client/target/classes" ]; then
@@ -8,8 +8,7 @@ if [ ! -d "client/target/classes" ]; then
     exit 1
 fi
 
-cd server/target/tpe2-g05-server-2025.2Q
-echo "--- Starting server ---"
-  . ./run-server.sh $*
+cd client/target/tpe2-g05-client-2025.2Q
+./run-client.sh $*
 cd -
 unset JAVA_RUN_CLASS

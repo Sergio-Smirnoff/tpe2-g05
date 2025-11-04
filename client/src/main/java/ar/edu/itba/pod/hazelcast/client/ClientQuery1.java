@@ -1,10 +1,9 @@
 package ar.edu.itba.pod.hazelcast.client;
 
-import ar.edu.itba.pod.hazelcast.common.QueryOneFourResult;
+import ar.edu.itba.pod.hazelcast.common.utility.QueryOneFourResult;
 import ar.edu.itba.pod.hazelcast.query1.*;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
-import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 
@@ -12,8 +11,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;

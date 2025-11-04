@@ -4,7 +4,6 @@ import ar.edu.itba.pod.hazelcast.query2.*;
 
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
-import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 
@@ -78,7 +77,10 @@ public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>>
     }
 
     public static void main(String[] args) {
-        ClientQuery2 query2 = new ClientQuery2(System.getProperty("addresses"), System.getProperty("inPath"), System.getProperty("outPath"));
+        String serverAddress = "127.0.0.1"; // Connect to the server you just started.
+        String inputPath = "client/src/main/assembly";          // Assumes a 'data' folder at the project root.
+        String outputPath = "client/src/main/assembly";
+        ClientQuery2 query2 = new ClientQuery2(serverAddress, inputPath, outputPath);
         query2.run();
     }
 }

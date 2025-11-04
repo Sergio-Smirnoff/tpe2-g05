@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.hazelcast.client.queryOne;
+package ar.edu.itba.pod.hazelcast.client.queryFour;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,9 +16,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class QueryFourTest {
+public class QueryFourTestSQL {
     private static Connection h2Connection;
-    private static final Logger logger = LoggerFactory.getLogger(QueryFourTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(QueryFourTestSQL.class);
 
     @BeforeAll
     public static void setUp() {
@@ -30,9 +30,9 @@ public class QueryFourTest {
 
             try (Statement stmt = h2Connection.createStatement()) {
 
-                String tripsResourcePath = "/trips-2025-01-mini.csv";
-                URL tripsUrl = QueryFourTest.class.getResource(tripsResourcePath);
-                URL zonesUrl = QueryFourTest.class.getResource("/zones.csv");
+                String tripsResourcePath = "/trips-2025-01-2000000.csv";
+                URL tripsUrl = QueryFourTestSQL.class.getResource(tripsResourcePath);
+                URL zonesUrl = QueryFourTestSQL.class.getResource("/zones.csv");
 
                 if (tripsUrl == null || zonesUrl == null) {
                     fail("Test resource CSV files not found in classpath. Make sure they are in src/test/resources.");
