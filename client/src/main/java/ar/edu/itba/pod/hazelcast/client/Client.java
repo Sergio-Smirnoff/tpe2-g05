@@ -49,7 +49,7 @@ abstract class Client<T, K> {
     private static final String GROUP_NAME = "g05-hazelcast";
     private static final String GROUP_PASS = "g05-hazelcast-pass";
 
-    protected static final String TRIPS_PATH = "trips-2025-01.csv";
+    protected static final String TRIPS_PATH = "trips.csv";
     protected static final String ZONES_PATH = "zones.csv";
     protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
