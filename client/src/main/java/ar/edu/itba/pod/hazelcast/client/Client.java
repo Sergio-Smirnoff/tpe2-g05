@@ -148,7 +148,7 @@ abstract class Client<T, K> {
         KeyValueSource<Integer, T> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
 
         final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
-        final int BATCH_SIZE = 20_000;
+        final int BATCH_SIZE = 10_000;
         ExecutorService executorService = Executors.newFixedThreadPool(MAX_THREADS);
         final AtomicInteger tripsMapKey = new AtomicInteger();
 
