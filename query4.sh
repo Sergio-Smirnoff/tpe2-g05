@@ -1,4 +1,4 @@
-query3.sh#!/bin/bash
+#!/bin/bash
 
 export JAVA_RUN_CLASS="ClientQuery4"
 
