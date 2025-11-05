@@ -21,6 +21,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -46,7 +49,7 @@ abstract class Client<T, K> {
     private static final String GROUP_NAME = "g05-hazelcast";
     private static final String GROUP_PASS = "g05-hazelcast-pass";
 
-    protected static final String TRIPS_PATH = "trips.csv";
+    protected static final String TRIPS_PATH = "trips-2025-01-mini.csv";
     protected static final String ZONES_PATH = "zones.csv";
     protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -143,20 +146,80 @@ abstract class Client<T, K> {
         IMap<Integer, T> tripsMap = hazelcastInstance.getMap("trips-" + clientNumber);
         KeyValueSource<Integer, T> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
 
+        final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
+        final int BATCH_SIZE = 50_000;
+        ExecutorService executorService = Executors.newFixedThreadPool(MAX_THREADS);
         final AtomicInteger tripsMapKey = new AtomicInteger();
 
         try (Stream<String> lines = Files.lines( Path.of(inPath).resolve(TRIPS_PATH), StandardCharsets.UTF_8)) {
-            lines.parallel().skip(1)
-                    .map(line -> line.split(";"))
-                    .filter(filter)
-                    .map(mapper)
-                    .forEach(trip -> {
-                        Integer uniqueId = tripsMapKey.getAndIncrement();
-                        tripsMap.put(uniqueId, trip);
-                    });
+            Iterator<String> iterator = lines.iterator();
+            List<String> batch = new ArrayList<>(BATCH_SIZE);
+
+            // skip header
+            if(iterator.hasNext()) iterator.next();
+
+            // process data
+            while(iterator.hasNext()){
+                batch.add(iterator.next());
+
+                if(batch.size() == BATCH_SIZE) {
+                    executorService.submit(new TripBatchLoader<>(
+                            new ArrayList<>(batch),
+                            tripsMap,
+                            tripsMapKey,
+                            filter,
+                            mapper
+                    ));
+
+                    batch.clear();
+                }
+
+                if(!batch.isEmpty()){
+                    executorService.submit(new TripBatchLoader<>(
+                            new ArrayList<>(batch),
+                            tripsMap,
+                            tripsMapKey,
+                            filter,
+                            mapper
+                    ));
+                }
+            }
+        }
+
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(30, TimeUnit.MINUTES);
+        } catch (InterruptedException e){
+            logger.log(Level.SEVERE, "Error en la ejecución", e);
+            Thread.currentThread().interrupt();
         }
 
         return tripsKeyValueSource;
+    }
+
+    private record TripBatchLoader<T>(
+            List<String> lines,
+            IMap<Integer, T> tripsMap,
+            AtomicInteger tripsMapKey,
+            Predicate<? super String[]> filter,
+            Function<String[], T> mapper
+    ) implements Runnable{
+
+        @Override
+        public void run() {
+            Map<Integer, T> localTripsBatch = new HashMap<>(lines.size());
+            for (String line: lines){
+                String[] parts = line.split(";");
+
+                if(filter().test(parts)){
+                    T trip = mapper.apply(parts);
+                    if(trip != null){
+                        localTripsBatch.put(tripsMapKey.getAndIncrement(), trip);
+                    }
+                }
+            }
+            tripsMap.putAll(localTripsBatch);
+        }
     }
 
     protected void printResults(List<String> toPrintList){

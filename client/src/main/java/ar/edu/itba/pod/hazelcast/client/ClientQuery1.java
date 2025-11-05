@@ -1,23 +1,16 @@
 package ar.edu.itba.pod.hazelcast.client;
 
-import ar.edu.itba.pod.hazelcast.common.ZonesRow;
+
 import ar.edu.itba.pod.hazelcast.common.utility.QueryOneFourResult;
 import ar.edu.itba.pod.hazelcast.query1.*;
 import com.hazelcast.core.ICompletableFuture;
-import com.hazelcast.core.IMap;
-import com.hazelcast.mapreduce.Job;
+
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class ClientQuery1 extends Client<TripRowQ1, SortedSet<QueryOneFourResult>>{
     private static final Integer QUERY_NUMBER = 1;
@@ -45,7 +38,10 @@ public class ClientQuery1 extends Client<TripRowQ1, SortedSet<QueryOneFourResult
     }
 
     public static void main(String[] args){
-        ClientQuery1 query1 = new ClientQuery1(System.getProperty("addresses"), System.getProperty("inPath"), System.getProperty("outPath"));
+        String serverAddress = "127.0.0.1"; // Connect to the server you just started.
+        String inputPath = "client/src/main/assembly";          // Assumes a 'data' folder at the project root.
+        String outputPath = "client/src/main/assembly";
+        ClientQuery1 query1 = new ClientQuery1(serverAddress, inputPath, outputPath);
 
         Predicate<String[]> filter = line -> {
             int puId = Integer.parseInt(line[4]);
