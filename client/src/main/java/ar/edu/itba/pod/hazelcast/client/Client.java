@@ -1,12 +1,14 @@
 package ar.edu.itba.pod.hazelcast.client;
 
 import ar.edu.itba.pod.hazelcast.common.ZonesRow;
+import ar.edu.itba.pod.hazelcast.query1.TripRowQ1;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.config.GroupConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICompletableFuture;
+import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 
@@ -19,6 +21,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.*;
 import java.util.logging.Formatter;
 import java.util.stream.Stream;
@@ -76,11 +81,10 @@ abstract class Client<T, K> {
         }
     }
 
-    abstract KeyValueSource<Integer, T> loadData() throws IOException;
     abstract ICompletableFuture<K> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, T> keyValueSource);
     abstract void writeResults(K results) throws IOException;
 
-    public void run(){
+    public void run(Predicate<? super String[]> filter, Function<String[], T> mapper){
         logger.info("Query-" + clientNumber + ": Cliente iniciando ...");
 
         try {
@@ -99,7 +103,7 @@ abstract class Client<T, K> {
 
             timeLogger.info("Inicio de la lectura del archivo");
 
-            KeyValueSource<Integer, T> valueSource = loadData();
+            KeyValueSource<Integer, T> valueSource = loadTripsData(filter, mapper); ;
 
             timeLogger.info("Fin de lectura del archivo");
             timeLogger.info("Inicio del trabajo map/reduce");
@@ -131,6 +135,28 @@ abstract class Client<T, K> {
                     ))
                     .forEach(zone -> zonesMap.put(zone.getLocationID(), zone));
         }
+    }
+
+    protected KeyValueSource<Integer, T> loadTripsData(Predicate<? super String[]> filter, Function<String[], T> mapper) throws IOException {
+        loadZonesData();
+
+        IMap<Integer, T> tripsMap = hazelcastInstance.getMap("trips-" + clientNumber);
+        KeyValueSource<Integer, T> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
+
+        final AtomicInteger tripsMapKey = new AtomicInteger();
+
+        try (Stream<String> lines = Files.lines( Path.of(inPath).resolve(TRIPS_PATH), StandardCharsets.UTF_8)) {
+            lines.parallel().skip(1)
+                    .map(line -> line.split(";"))
+                    .filter(filter)
+                    .map(mapper)
+                    .forEach(trip -> {
+                        Integer uniqueId = tripsMapKey.getAndIncrement();
+                        tripsMap.put(uniqueId, trip);
+                    });
+        }
+
+        return tripsKeyValueSource;
     }
 
     protected void printResults(List<String> toPrintList){
