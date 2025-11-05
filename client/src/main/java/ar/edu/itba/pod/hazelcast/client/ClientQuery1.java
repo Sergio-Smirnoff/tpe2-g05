@@ -1,6 +1,6 @@
 package ar.edu.itba.pod.hazelcast.client;
 
-import ar.edu.itba.pod.hazelcast.common.QueryOneFourResult;
+import ar.edu.itba.pod.hazelcast.common.utility.QueryOneFourResult;
 import ar.edu.itba.pod.hazelcast.query1.*;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
