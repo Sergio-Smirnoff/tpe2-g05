@@ -181,11 +181,8 @@ abstract class Client<T, K> {
         final AtomicInteger tripsMapKey = new AtomicInteger();
 
         try (Stream<String> lines = Files.lines( Path.of(inPath).resolve(TRIPS_PATH), StandardCharsets.UTF_8)) {
-            Iterator<String> iterator = lines.iterator();
+            Iterator<String> iterator = lines.skip(1).filter(x -> filter.test(x.split(";"))).iterator();
             List<String> batch = new ArrayList<>(BATCH_SIZE);
-
-            // skip header
-            if(iterator.hasNext()) iterator.next();
 
             // process data
             while(iterator.hasNext()){
@@ -240,12 +237,10 @@ abstract class Client<T, K> {
             for (String line: lines){
                 String[] parts = line.split(";");
 
-                if(filter().test(parts)){
-                    T trip = mapper.apply(parts);
-                    if(trip != null){
-                        localTripsBatch.put(tripsMapKey.getAndIncrement(), trip);
-                    }
-                }
+                T trip = mapper.apply(parts);
+                if(trip != null)
+                    localTripsBatch.put(tripsMapKey.getAndIncrement(), trip);
+
             }
             tripsMap.putAll(localTripsBatch);
         }
