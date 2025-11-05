@@ -193,7 +193,6 @@ abstract class Client<T, K> {
                             new ArrayList<>(batch),
                             tripsMap,
                             tripsMapKey,
-                            filter,
                             mapper
                     ));
 
@@ -206,7 +205,6 @@ abstract class Client<T, K> {
                         new ArrayList<>(batch),
                         tripsMap,
                         tripsMapKey,
-                        filter,
                         mapper
                 ));
             }
@@ -227,7 +225,6 @@ abstract class Client<T, K> {
             List<String> lines,
             IMap<Integer, T> tripsMap,
             AtomicInteger tripsMapKey,
-            Predicate<? super String[]> filter,
             Function<String[], T> mapper
     ) implements Runnable{
 
