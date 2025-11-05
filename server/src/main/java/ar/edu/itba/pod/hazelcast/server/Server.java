@@ -46,7 +46,7 @@ public class Server {
 
 
         InterfacesConfig interfacesConfig = new InterfacesConfig()
-                .setInterfaces(ALLOWED_INTERFACES).setEnabled(true);
+                .setInterfaces(Collections.singletonList("127.0.0.1")).setEnabled(true);
 
         NetworkConfig networkConfig = new NetworkConfig().setInterfaces(interfacesConfig).setJoin(joinConfig);
         config.setNetworkConfig(networkConfig);
