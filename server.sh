@@ -13,7 +13,7 @@ cd server/target/tpe2-g05-server-2025.2Q
 for (( i=0; i<2; i++ ))
 do
   echo "--- Starting server (run $((i+1))) ---"
-  ./run-server.sh &
+  . ./run-server.sh &
 done
 
 wait

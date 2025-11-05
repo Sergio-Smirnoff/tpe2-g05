@@ -21,7 +21,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class ClientQuery3 extends Client<TripRowQ3, List<AvgPriceBoroughCompany>>{
+public class ClientQuery3 extends Client<TripRowQ3, AvgPriceBoroughCompany>{
     private static final Integer QUERY_NUMBER = 3;
     private static final int OUTSIDE_NYC_ID = 265;
 
@@ -38,13 +38,9 @@ public class ClientQuery3 extends Client<TripRowQ3, List<AvgPriceBoroughCompany>
     }
 
     @Override
-    void writeResults(List<AvgPriceBoroughCompany> results)  {
-        List<String> toPrint = new ArrayList<>();
-        toPrint.add("pickUpBorough;company;avgFare");
-        toPrint.addAll(results.stream().map(Objects::toString).toList());
-        this.printResults(toPrint);
+    String getCsvHeader() {
+        return "pickUpBorough;company;avgFare";
     }
-
 
     public static void main(String[] args) {
         String serverAddress = "127.0.0.1"; // Connect to the server you just started.

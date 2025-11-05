@@ -20,7 +20,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>> {
+public class ClientQuery2 extends Client<TripRowQ2, LongestTripResult> {
     private static final Integer QUERY_NUMBER = 2;
 
     private static final int OUTSIDE_NYC_ID = 265; // ID de "Outside of NYC"
@@ -30,12 +30,8 @@ public class ClientQuery2 extends Client<TripRowQ2,SortedSet<LongestTripResult>>
     }
 
     @Override
-    void writeResults(SortedSet<LongestTripResult> results)  {
-        List<String> toPrint = new ArrayList<>();
-        // Header de Query 2
-        toPrint.add("pickUpZone;longestDOZone;longestPUDateTime;longestMiles;longestCompany");
-        toPrint.addAll(results.stream().map(Objects::toString).toList());
-        this.printResults(toPrint);
+    String getCsvHeader() {
+        return "pickUpZone;longestDOZone;longestPUDateTime;longestMiles;longestCompany";
     }
 
     @Override

@@ -20,7 +20,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class ClientQuery5 extends Client<TripRowQ5, List<TotalMilesResult>> {
+public class ClientQuery5 extends Client<TripRowQ5, TotalMilesResult> {
     private static final Integer QUERY_NUMBER = 5;
 
     public ClientQuery5(final String address, final String inPath, final String outPath){
@@ -37,12 +37,10 @@ public class ClientQuery5 extends Client<TripRowQ5, List<TotalMilesResult>> {
     }
 
     @Override
-    void writeResults(List<TotalMilesResult> results) {
-        List<String> toPrint = new ArrayList<>();
-        toPrint.add("company;year;month;milesYTD");
-        toPrint.addAll(results.stream().map(Objects::toString).toList());
-        this.printResults(toPrint);
+    String getCsvHeader() {
+        return "company;year;month;milesYTD";
     }
+
 
     public static void main(String[] args) {
         String serverAddress = "127.0.0.1"; // Connect to the server you just started.

@@ -20,7 +20,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult>>{
+public class ClientQuery4 extends Client<TripRowQ4, QueryOneFourResult>{
     private static final Integer QUERY_NUMBER = 4;
     private final String borough;
 
@@ -39,12 +39,8 @@ public class ClientQuery4 extends Client<TripRowQ4, SortedSet<QueryOneFourResult
     }
 
     @Override
-    void writeResults(SortedSet<QueryOneFourResult> results) {
-        List<String> toPrint = new ArrayList<>();
-        // Add headers
-        toPrint.add("pickUpZone;dropOffZone;delayInSeconds");
-        toPrint.addAll(results.stream().map(Objects::toString).toList());
-        this.printResults(toPrint);
+    String getCsvHeader() {
+        return "pickUpZone;dropOffZone;delayInSeconds";
     }
 
 

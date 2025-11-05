@@ -84,8 +84,20 @@ abstract class Client<T, K> {
         }
     }
 
-    abstract ICompletableFuture<K> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, T> keyValueSource);
-    abstract void writeResults(K results) throws IOException;
+    abstract ICompletableFuture<? extends Collection<K>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, T> keyValueSource);
+    abstract String getCsvHeader();
+
+    private void writeResults(Collection<K> results) {
+        try {
+            List<String> toPrint = new ArrayList<>();
+            toPrint.add(getCsvHeader());
+            toPrint.addAll(results.stream().map(Objects::toString).toList());
+            Files.write(Path.of(outPath).resolve("query" + clientNumber + ".csv"), toPrint, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error escribiendo los resultados", e);
+        }
+    }
+
 
     public void run(Predicate<? super String[]> filter, Function<String[], T> mapper){
         logger.info("Query-" + clientNumber + ": Cliente iniciando ...");
@@ -113,9 +125,9 @@ abstract class Client<T, K> {
             timeLogger.info("Inicio del trabajo map/reduce");
 
             JobTracker jobTracker = hazelcastInstance.getJobTracker("query-" + clientNumber);
-            ICompletableFuture<K> future = executeMapReduce(jobTracker, valueSource);
+            ICompletableFuture<? extends Collection<K>> future = executeMapReduce(jobTracker, valueSource);
 
-            K results = future.get();
+            Collection<K> results = future.get();
 
             writeResults(results);
 
@@ -223,11 +235,5 @@ abstract class Client<T, K> {
         }
     }
 
-    protected void printResults(List<String> toPrintList){
-        try {
-            Files.write(Path.of(outPath).resolve("query" + clientNumber + ".csv"), toPrintList, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error escribiendo los resultados", e);
-        }
-    }
+
 }
