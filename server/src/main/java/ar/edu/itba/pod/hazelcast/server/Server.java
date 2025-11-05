@@ -40,15 +40,16 @@ public class Server {
         GroupConfig groupConfig = new GroupConfig().setName(SERVER_NAME).setPassword(SERVER_PASS);
         config.setGroupConfig(groupConfig);
 
-        // Network Config
-        NetworkConfig networkConfig = config.getNetworkConfig();
+        MulticastConfig multicastConfig = new MulticastConfig();
 
-        networkConfig.getJoin().getTcpIpConfig().setEnabled(false);
-        networkConfig.getJoin().getMulticastConfig().setEnabled(true);
+        JoinConfig joinConfig = new JoinConfig().setMulticastConfig(multicastConfig);
 
-        networkConfig.getInterfaces()
-                .setEnabled(true)
-                .setInterfaces(ALLOWED_INTERFACES);
+
+        InterfacesConfig interfacesConfig = new InterfacesConfig()
+                .setInterfaces(ALLOWED_INTERFACES).setEnabled(true);
+
+        NetworkConfig networkConfig = new NetworkConfig().setInterfaces(interfacesConfig).setJoin(joinConfig);
+        config.setNetworkConfig(networkConfig);
 
         ManagementCenterConfig managementCenterConfig = new ManagementCenterConfig()
                 .setUrl(MANCENTER_URL)
