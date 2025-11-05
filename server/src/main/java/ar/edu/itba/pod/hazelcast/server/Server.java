@@ -25,16 +25,17 @@ public class Server {
         config.setGroupConfig(groupConfig);
 
         // Network Config
-        MulticastConfig multicastConfig = new MulticastConfig();
+        NetworkConfig networkConfig = config.getNetworkConfig();
 
-        JoinConfig joinConfig = new JoinConfig().setMulticastConfig(multicastConfig);
+        networkConfig.getJoin().getMulticastConfig().setEnabled(false);
 
-        InterfacesConfig interfacesConfig = new InterfacesConfig()
-                .setInterfaces(Collections.singletonList("127.0.0.*")).setEnabled(true);
+        networkConfig.getJoin().getTcpIpConfig()
+                .setEnabled(true)
+                .addMember("127.0.0.1");
 
-        NetworkConfig networkConfig = new NetworkConfig().setInterfaces(interfacesConfig).setJoin(joinConfig);
-
-        config.setNetworkConfig(networkConfig);
+        networkConfig.getInterfaces()
+                .setEnabled(true)
+                .setInterfaces(Collections.singletonList("127.0.0.1"));
 
         ManagementCenterConfig managementCenterConfig = new ManagementCenterConfig()
                 .setUrl("http://localhost:8081/mancenter/")

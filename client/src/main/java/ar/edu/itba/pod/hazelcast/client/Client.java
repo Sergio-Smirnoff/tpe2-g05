@@ -49,7 +49,7 @@ abstract class Client<T, K> {
     private static final String GROUP_NAME = "g05-hazelcast";
     private static final String GROUP_PASS = "g05-hazelcast-pass";
 
-    protected static final String TRIPS_PATH = "trips-2025-01-mini.csv";
+    protected static final String TRIPS_PATH = "trips-2025-01.csv";
     protected static final String ZONES_PATH = "zones.csv";
     protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -100,6 +100,7 @@ abstract class Client<T, K> {
 
             // Client Config
             ClientConfig clientConfig = new ClientConfig().setGroupConfig(groupConfig).setNetworkConfig(clientNetworkConfig);
+            clientConfig.setProperty("hazelcast.client.heartbeat.timeout", "300000");
 
             // Node Client
             hazelcastInstance = HazelcastClient.newHazelcastClient(clientConfig);
@@ -147,7 +148,7 @@ abstract class Client<T, K> {
         KeyValueSource<Integer, T> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
 
         final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
-        final int BATCH_SIZE = 50_000;
+        final int BATCH_SIZE = 20_000;
         ExecutorService executorService = Executors.newFixedThreadPool(MAX_THREADS);
         final AtomicInteger tripsMapKey = new AtomicInteger();
 
@@ -173,16 +174,16 @@ abstract class Client<T, K> {
 
                     batch.clear();
                 }
+            }
 
-                if(!batch.isEmpty()){
-                    executorService.submit(new TripBatchLoader<>(
-                            new ArrayList<>(batch),
-                            tripsMap,
-                            tripsMapKey,
-                            filter,
-                            mapper
-                    ));
-                }
+            if(!batch.isEmpty()){
+                executorService.submit(new TripBatchLoader<>(
+                        new ArrayList<>(batch),
+                        tripsMap,
+                        tripsMapKey,
+                        filter,
+                        mapper
+                ));
             }
         }
 
