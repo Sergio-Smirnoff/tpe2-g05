@@ -21,7 +21,7 @@ public class Server {
     private static final String MANCENTER_URL = "http://localhost:8081/mancenter/";
 
     private static final String INTERFACE_LOOPBACK = "127.0.0.1";
-    private static final String INTERFACE_NETWORK_A = "10.6.0.*";
+    private static final String INTERFACE_NETWORK_A = "10.*.*.*";
     private static final String INTERFACE_NETWORK_C = "192.168.1.*";
 
     private static final List<String> ALLOWED_INTERFACES = Arrays.asList(
