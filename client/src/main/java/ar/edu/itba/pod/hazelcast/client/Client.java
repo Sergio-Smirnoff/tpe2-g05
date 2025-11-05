@@ -38,6 +38,7 @@ abstract class Client<T, K> {
     protected final String address;
     protected final String inPath;
     protected final String outPath;
+    private final String mapName;
 
     protected HazelcastInstance hazelcastInstance;
     // Mapa en memoria de zones para optimizar la carga de datos y reducir tráfico de red
@@ -58,6 +59,7 @@ abstract class Client<T, K> {
         this.address = address;
         this.inPath = inPath;
         this.outPath = outPath;
+        this.mapName = "trips-" + clientNumber;
         try {
             FileHandler fh = new FileHandler(Path.of(outPath).resolve("time" + clientNumber + ".csv").toString(), false);
             fh.setFormatter(new Formatter() {
@@ -135,6 +137,7 @@ abstract class Client<T, K> {
         } catch ( Exception e ) {
             logger.log(Level.SEVERE, "Error en la ejecución", e);
         } finally {
+            finalizeMap();
             HazelcastClient.shutdownAll();
         }
 
@@ -153,10 +156,23 @@ abstract class Client<T, K> {
         }
     }
 
+    protected void finalizeMap() {
+        try {
+            if (hazelcastInstance != null && this.mapName != null) {
+                logger.info("Query finalizada. Destruyendo mapa: "+this.mapName);
+
+                hazelcastInstance.getMap(this.mapName).destroy();
+                logger.info("Mapa "+this.mapName+ "destruido.");
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE,"Error durante la destrucción del mapa: {}", e.getLocalizedMessage());
+        }
+    }
+
     protected KeyValueSource<Integer, T> loadTripsData(Predicate<? super String[]> filter, Function<String[], T> mapper) throws IOException {
         loadZonesData();
 
-        IMap<Integer, T> tripsMap = hazelcastInstance.getMap("trips-" + clientNumber);
+        IMap<Integer, T> tripsMap = hazelcastInstance.getMap(mapName);
         KeyValueSource<Integer, T> tripsKeyValueSource = KeyValueSource.fromMap(tripsMap);
 
         final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
