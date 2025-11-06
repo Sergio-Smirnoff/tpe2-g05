@@ -114,7 +114,6 @@ abstract class Client<T, K> {
 
             // Client Config
             ClientConfig clientConfig = new ClientConfig().setGroupConfig(groupConfig).setNetworkConfig(clientNetworkConfig);
-            clientConfig.setProperty("hazelcast.client.heartbeat.timeout", "300000");
 
             // Node Client
             hazelcastInstance = HazelcastClient.newHazelcastClient(clientConfig);
