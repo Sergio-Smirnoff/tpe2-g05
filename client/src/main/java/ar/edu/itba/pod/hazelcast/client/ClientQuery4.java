@@ -45,10 +45,10 @@ public class ClientQuery4 extends Client<TripRowQ4, QueryOneFourResult>{
 
 
     public static void main(String[] args){
-        String serverAddress = "127.0.0.1"; // Connect to the server you just started.
-        String inputPath = "client/src/main/assembly";          // Assumes a 'data' folder at the project root.
-        String outputPath = "client/src/main/assembly";
-        String borough = "Manhattan";
+        String serverAddress = System.getProperty("addresses", "127.0.0.1"); 
+        String inputPath = System.getProperty("inPath", "client/src/main/assembly");
+        String outputPath = System.getProperty("outPath", "client/src/main/assembly");
+        String borough = System.getProperty("borough", "Manhattan");
         ClientQuery4 query4 = new ClientQuery4(serverAddress, inputPath, outputPath, borough);
 
         Predicate<String[]> filter = line ->{

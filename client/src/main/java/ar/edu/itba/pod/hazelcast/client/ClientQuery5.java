@@ -43,9 +43,9 @@ public class ClientQuery5 extends Client<TripRowQ5, TotalMilesResult> {
 
 
     public static void main(String[] args) {
-        String serverAddress = "127.0.0.1"; // Connect to the server you just started.
-        String inputPath = "client/src/main/assembly";          // Assumes a 'data' folder at the project root.
-        String outputPath = "client/src/main/assembly";
+        String serverAddress = System.getProperty("addresses", "127.0.0.1"); 
+        String inputPath = System.getProperty("inPath", "client/src/main/assembly");
+        String outputPath = System.getProperty("outPath", "client/src/main/assembly");
         ClientQuery5 query5 = new ClientQuery5(serverAddress, inputPath, outputPath);
 
         Predicate<String[]> filter = line -> true;
