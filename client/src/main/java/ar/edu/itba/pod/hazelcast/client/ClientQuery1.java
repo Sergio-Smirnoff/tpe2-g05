@@ -15,8 +15,8 @@ import java.util.function.Predicate;
 public class ClientQuery1 extends Client<TripRowQ1, QueryOneFourResult>{
     private static final Integer QUERY_NUMBER = 1;
 
-    public ClientQuery1(final String address, final String inPath, final String outPath){
-        super(QUERY_NUMBER, address, inPath, outPath);
+    public ClientQuery1(){
+        super(QUERY_NUMBER);
     }
 
     @Override
@@ -34,10 +34,7 @@ public class ClientQuery1 extends Client<TripRowQ1, QueryOneFourResult>{
     }
 
     public static void main(String[] args){
-        String serverAddress = System.getProperty("addresses", "127.0.0.1"); 
-        String inputPath = System.getProperty("inPath", "client/src/main/assembly");
-        String outputPath = System.getProperty("outPath", "client/src/main/assembly");
-        ClientQuery1 query1 = new ClientQuery1(serverAddress, inputPath, outputPath);
+        ClientQuery1 query1 = new ClientQuery1();
 
         Predicate<String[]> filter = line -> {
             int puId = Integer.parseInt(line[4]);
@@ -48,7 +45,6 @@ public class ClientQuery1 extends Client<TripRowQ1, QueryOneFourResult>{
                     (query1.zonesMap.get(doId) != null);
 
         };
-
 
         Function<String[], TripRowQ1> mapper = line -> new TripRowQ1(
                 query1.zonesMap.get(Integer.parseInt(line[4])).getZone(),

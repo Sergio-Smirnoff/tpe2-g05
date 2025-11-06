@@ -25,8 +25,8 @@ public class ClientQuery2 extends Client<TripRowQ2, LongestTripResult> {
 
     private static final int OUTSIDE_NYC_ID = 265; // ID de "Outside of NYC"
 
-    public ClientQuery2(final String address, final String inPath, final String outPath){
-        super(QUERY_NUMBER, address, inPath, outPath);
+    public ClientQuery2(){
+        super(QUERY_NUMBER);
     }
 
     @Override
@@ -44,10 +44,7 @@ public class ClientQuery2 extends Client<TripRowQ2, LongestTripResult> {
     }
 
     public static void main(String[] args) {
-        String serverAddress = System.getProperty("addresses", "127.0.0.1"); 
-        String inputPath = System.getProperty("inPath", "client/src/main/assembly");
-        String outputPath = System.getProperty("outPath", "client/src/main/assembly");
-        ClientQuery2 query2 = new ClientQuery2(serverAddress, inputPath, outputPath);
+        ClientQuery2 query2 = new ClientQuery2();
 
         Predicate<String[]> filter = line -> {
             int puId = Integer.parseInt(line[4]);
@@ -57,7 +54,6 @@ public class ClientQuery2 extends Client<TripRowQ2, LongestTripResult> {
                     (query2.zonesMap.get(puId) != null) &&
                     (query2.zonesMap.get(doId) != null);
         };
-
 
         Function<String[], TripRowQ2> mapper = line -> new TripRowQ2(
                 // Creamos el DTO optimizado para Q2

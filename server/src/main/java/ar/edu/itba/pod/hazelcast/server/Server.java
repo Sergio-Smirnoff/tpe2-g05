@@ -16,19 +16,11 @@ import java.util.logging.LogManager;
 public class Server {
     private static Logger logger = LoggerFactory.getLogger(Server.class);
 
-    private static final String SERVER_NAME = "g05-hazelcast";
-    private static final String SERVER_PASS = "g05-hazelcast-pass";
+    private static final String SERVER_NAME = "g5-hazelcast";
+    private static final String SERVER_PASS = "g5-hazelcast-pass";
     private static final String MANCENTER_URL = "http://localhost:8081/mancenter/";
 
     private static final String INTERFACE_LOOPBACK = "127.0.0.1";
-    private static final String INTERFACE_NETWORK_A = "10.*";
-    private static final String INTERFACE_NETWORK_C = "192.168.1.*";
-
-    private static final List<String> ALLOWED_INTERFACES = Arrays.asList(
-            INTERFACE_LOOPBACK,
-            INTERFACE_NETWORK_A,
-            INTERFACE_NETWORK_C
-    );
 
     public static void main(String[] args) {
         logger.info(" Server Starting ...");
@@ -44,9 +36,8 @@ public class Server {
 
         JoinConfig joinConfig = new JoinConfig().setMulticastConfig(multicastConfig);
 
-
         InterfacesConfig interfacesConfig = new InterfacesConfig()
-                .setInterfaces(Collections.singletonList("127.0.0.1")).setEnabled(true);
+                .setInterfaces(Collections.singletonList(System.getProperty("interface", INTERFACE_LOOPBACK))).setEnabled(true);
 
         NetworkConfig networkConfig = new NetworkConfig().setInterfaces(interfacesConfig).setJoin(joinConfig);
         config.setNetworkConfig(networkConfig);
