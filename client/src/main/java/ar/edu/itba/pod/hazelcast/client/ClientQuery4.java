@@ -24,8 +24,8 @@ public class ClientQuery4 extends Client<TripRowQ4, QueryOneFourResult>{
     private static final Integer QUERY_NUMBER = 4;
     private final String borough;
 
-    public ClientQuery4(final String address, final String inPath, final String outPath, final String borough){
-        super(QUERY_NUMBER, address, inPath, outPath);
+    public ClientQuery4(final String borough){
+        super(QUERY_NUMBER);
         this.borough = borough;
     }
 
@@ -45,11 +45,8 @@ public class ClientQuery4 extends Client<TripRowQ4, QueryOneFourResult>{
 
 
     public static void main(String[] args){
-        String serverAddress = System.getProperty("addresses", "127.0.0.1"); 
-        String inputPath = System.getProperty("inPath", "client/src/main/assembly");
-        String outputPath = System.getProperty("outPath", "client/src/main/assembly");
         String borough = System.getProperty("borough", "Manhattan");
-        ClientQuery4 query4 = new ClientQuery4(serverAddress, inputPath, outputPath, borough);
+        ClientQuery4 query4 = new ClientQuery4(borough);
 
         Predicate<String[]> filter = line ->{
             ZonesRow PUZoneRow = query4.zonesMap.get(Integer.parseInt(line[4]));

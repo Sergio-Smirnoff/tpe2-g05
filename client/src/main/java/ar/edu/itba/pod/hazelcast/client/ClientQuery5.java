@@ -23,8 +23,8 @@ import java.util.stream.Stream;
 public class ClientQuery5 extends Client<TripRowQ5, TotalMilesResult> {
     private static final Integer QUERY_NUMBER = 5;
 
-    public ClientQuery5(final String address, final String inPath, final String outPath){
-        super(QUERY_NUMBER, address, inPath, outPath);
+    public ClientQuery5(){
+        super(QUERY_NUMBER);
     }
 
     @Override
@@ -43,10 +43,7 @@ public class ClientQuery5 extends Client<TripRowQ5, TotalMilesResult> {
 
 
     public static void main(String[] args) {
-        String serverAddress = System.getProperty("addresses", "127.0.0.1"); 
-        String inputPath = System.getProperty("inPath", "client/src/main/assembly");
-        String outputPath = System.getProperty("outPath", "client/src/main/assembly");
-        ClientQuery5 query5 = new ClientQuery5(serverAddress, inputPath, outputPath);
+        ClientQuery5 query5 = new ClientQuery5();
 
         Predicate<String[]> filter = line -> true;
 

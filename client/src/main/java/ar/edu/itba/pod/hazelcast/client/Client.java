@@ -1,7 +1,6 @@
 package ar.edu.itba.pod.hazelcast.client;
 
 import ar.edu.itba.pod.hazelcast.common.ZonesRow;
-import ar.edu.itba.pod.hazelcast.query1.TripRowQ1;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
@@ -35,7 +34,7 @@ import java.util.stream.Stream;
 abstract class Client<T, K> {
 
     protected final Integer clientNumber;
-    protected final String address;
+    protected final String[] addresses;
     protected final String inPath;
     protected final String outPath;
     private final String mapName;
@@ -47,18 +46,18 @@ abstract class Client<T, K> {
     private static final Logger logger = Logger.getLogger(Client.class.getName());
     private static final Logger timeLogger = Logger.getLogger("timeLogger");
 
-    private static final String GROUP_NAME = "g05-hazelcast";
-    private static final String GROUP_PASS = "g05-hazelcast-pass";
+    private static final String GROUP_NAME = "g5-hazelcast";
+    private static final String GROUP_PASS = "g5-hazelcast-pass";
 
     protected static final String TRIPS_PATH = "trips.csv";
     protected static final String ZONES_PATH = "zones.csv";
     protected static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public Client(Integer clientNumber, String address, String inPath, String outPath){
+    public Client(Integer clientNumber){
         this.clientNumber = clientNumber;
-        this.address = address;
-        this.inPath = inPath;
-        this.outPath = outPath;
+        this.addresses = System.getProperty("addresses", "127.0.0.1").split(";");
+        this.inPath = System.getProperty("inPath", ".");
+        this.outPath = System.getProperty("outPath", ".");
         this.mapName = "trips-" + clientNumber;
         try {
             FileHandler fh = new FileHandler(Path.of(outPath).resolve("time" + clientNumber + ".csv").toString(), false);
@@ -110,7 +109,8 @@ abstract class Client<T, K> {
 
             // Client Network Config
             ClientNetworkConfig clientNetworkConfig = new ClientNetworkConfig();
-            clientNetworkConfig.addAddress(this.address);
+            for (String address : addresses)
+                clientNetworkConfig.addAddress(address.trim());
 
             // Client Config
             ClientConfig clientConfig = new ClientConfig().setGroupConfig(groupConfig).setNetworkConfig(clientNetworkConfig);
@@ -142,7 +142,7 @@ abstract class Client<T, K> {
 
     }
 
-    protected void loadZonesData() throws IOException {
+    private void loadZonesData() throws IOException {
         try (Stream<String> lines = Files.lines(Paths.get(Path.of(inPath).resolve(ZONES_PATH).toString()), StandardCharsets.UTF_8)) {
             lines.skip(1)
                     .map(line -> line.split(";"))
@@ -155,7 +155,7 @@ abstract class Client<T, K> {
         }
     }
 
-    protected void finalizeMap() {
+    private void finalizeMap() {
         try {
             if (hazelcastInstance != null && this.mapName != null) {
                 logger.info("Query finalizada. Destruyendo mapa: "+this.mapName);
@@ -168,7 +168,7 @@ abstract class Client<T, K> {
         }
     }
 
-    protected KeyValueSource<Integer, T> loadTripsData(Predicate<? super String[]> filter, Function<String[], T> mapper) throws IOException {
+    private KeyValueSource<Integer, T> loadTripsData(Predicate<? super String[]> filter, Function<String[], T> mapper) throws IOException {
         loadZonesData();
 
         IMap<Integer, T> tripsMap = hazelcastInstance.getMap(mapName);
