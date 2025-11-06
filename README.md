@@ -35,7 +35,7 @@ Donde:
 - xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
 - yyyy : El puerto donde escucha el servidor.
 - DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de salida
+- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
 
 (Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
 
@@ -49,7 +49,7 @@ Donde:
 - xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
 - yyyy : El puerto donde escucha el servidor.
 - DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de salida
+- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
 
 (Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
 
@@ -62,7 +62,7 @@ Donde:
 - xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
 - yyyy : El puerto donde escucha el servidor.
 - DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay los archivos de salida
+- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
 
 (Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
 
@@ -76,7 +76,7 @@ Donde:
 - xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
 - yyyy : El puerto donde escucha el servidor.
 - DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de salida
+- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
 - Dborough: Es el barrio de inicio de viaje
 
 (Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
@@ -91,6 +91,6 @@ Donde:
 - xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
 - yyyy : El puerto donde escucha el servidor.
 - DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de salida
+- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
 
 (Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
