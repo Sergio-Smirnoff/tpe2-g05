@@ -16,8 +16,8 @@ import java.util.logging.LogManager;
 public class Server {
     private static Logger logger = LoggerFactory.getLogger(Server.class);
 
-    private static final String SERVER_NAME = "g05-hazelcast";
-    private static final String SERVER_PASS = "g05-hazelcast-pass";
+    private static final String SERVER_NAME = "g5-hazelcast";
+    private static final String SERVER_PASS = "g5-hazelcast-pass";
     private static final String MANCENTER_URL = "http://localhost:8081/mancenter/";
 
     private static final String INTERFACE_LOOPBACK = "127.0.0.1";

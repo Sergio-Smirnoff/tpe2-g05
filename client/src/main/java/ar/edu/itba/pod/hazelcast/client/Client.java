@@ -46,8 +46,8 @@ abstract class Client<T, K> {
     private static final Logger logger = Logger.getLogger(Client.class.getName());
     private static final Logger timeLogger = Logger.getLogger("timeLogger");
 
-    private static final String GROUP_NAME = "g05-hazelcast";
-    private static final String GROUP_PASS = "g05-hazelcast-pass";
+    private static final String GROUP_NAME = "g5-hazelcast";
+    private static final String GROUP_PASS = "g5-hazelcast-pass";
 
     protected static final String TRIPS_PATH = "trips.csv";
     protected static final String ZONES_PATH = "zones.csv";
