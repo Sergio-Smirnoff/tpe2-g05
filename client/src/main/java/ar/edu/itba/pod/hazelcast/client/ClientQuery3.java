@@ -25,8 +25,8 @@ public class ClientQuery3 extends Client<TripRowQ3, AvgPriceBoroughCompany>{
     private static final Integer QUERY_NUMBER = 3;
     private static final int OUTSIDE_NYC_ID = 265;
 
-    public ClientQuery3(final String address, final String inPath, final String outPath){
-        super(QUERY_NUMBER, address, inPath, outPath);
+    public ClientQuery3(){
+        super(QUERY_NUMBER);
     }
 
     @Override
@@ -43,10 +43,7 @@ public class ClientQuery3 extends Client<TripRowQ3, AvgPriceBoroughCompany>{
     }
 
     public static void main(String[] args) {
-        String serverAddress = System.getProperty("addresses", "127.0.0.1"); 
-        String inputPath = System.getProperty("inPath", "client/src/main/assembly");
-        String outputPath = System.getProperty("outPath", "client/src/main/assembly");
-        ClientQuery3 clientQuery3 = new ClientQuery3(serverAddress, inputPath, outputPath);
+        ClientQuery3 clientQuery3 = new ClientQuery3();
 
         Predicate<String[]> filter = line -> {
             int puId = Integer.parseInt(line[4]);
