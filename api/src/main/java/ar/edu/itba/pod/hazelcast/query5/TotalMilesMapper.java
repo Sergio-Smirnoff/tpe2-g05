@@ -5,6 +5,7 @@ import ar.edu.itba.pod.hazelcast.query5.objects.TripRowQ5;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
 
+@Deprecated
 public class TotalMilesMapper implements Mapper<Integer, TripRowQ5, TotalMilesKey, Double> {
     @Override
     public void map(Integer integer, TripRowQ5 tripRow, Context<TotalMilesKey, Double> context) {

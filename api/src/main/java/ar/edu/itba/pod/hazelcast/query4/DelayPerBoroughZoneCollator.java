@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+@Deprecated
 public class DelayPerBoroughZoneCollator implements Collator<Map.Entry<String, Pair<String, Long>>, SortedSet<QueryOneFourResult>> {
 
     @Override

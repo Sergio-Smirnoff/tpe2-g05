@@ -5,6 +5,7 @@ import ar.edu.itba.pod.hazelcast.common.utility.Utils;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
+@Deprecated
 public class DelayPerBoroughZoneReducerFactory implements ReducerFactory<String, Pair<String, Long>, Pair<String, Long>> {
 
     @Override

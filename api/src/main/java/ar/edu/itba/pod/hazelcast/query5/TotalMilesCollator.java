@@ -7,6 +7,8 @@ import com.hazelcast.mapreduce.Collator;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
+
+@Deprecated
 public class TotalMilesCollator implements Collator<Map.Entry<TotalMilesKey, Double>, List<TotalMilesResult>> {
     @Override
     public List<TotalMilesResult> collate(Iterable<Map.Entry<TotalMilesKey, Double>> iterable) {

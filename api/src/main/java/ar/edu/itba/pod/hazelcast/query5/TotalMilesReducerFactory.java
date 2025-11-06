@@ -4,6 +4,7 @@ import ar.edu.itba.pod.hazelcast.query5.objects.TotalMilesKey;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
+@Deprecated
 public class TotalMilesReducerFactory implements ReducerFactory<TotalMilesKey, Double, Double> {
 
     @Override

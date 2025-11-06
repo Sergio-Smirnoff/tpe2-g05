@@ -4,6 +4,7 @@ import ar.edu.itba.pod.hazelcast.common.utility.Pair;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
 
+@Deprecated
 public class DelayPerBoroughZoneMapper implements Mapper<Integer, TripRowQ4, String, Pair<String, Long>> {
 
     @Override

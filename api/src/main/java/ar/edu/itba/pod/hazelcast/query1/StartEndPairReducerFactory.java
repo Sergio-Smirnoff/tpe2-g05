@@ -4,6 +4,7 @@ import ar.edu.itba.pod.hazelcast.common.utility.Pair;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
+@Deprecated
 public class StartEndPairReducerFactory implements ReducerFactory<Pair<String, String>, Long, Long> {
     @Override
     public Reducer<Long, Long> newReducer(Pair key){

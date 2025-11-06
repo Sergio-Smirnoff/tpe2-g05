@@ -4,21 +4,12 @@ import ar.edu.itba.pod.hazelcast.common.utility.QueryOneFourResult;
 import ar.edu.itba.pod.hazelcast.query4.*;
 import ar.edu.itba.pod.hazelcast.common.ZonesRow;
 import com.hazelcast.core.ICompletableFuture;
-import com.hazelcast.core.IMap;
-import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class ClientQuery4 extends Client<TripRowQ4, QueryOneFourResult>{
     private static final Integer QUERY_NUMBER = 4;
@@ -30,6 +21,7 @@ public class ClientQuery4 extends Client<TripRowQ4, QueryOneFourResult>{
     }
 
     @Override
+    @Deprecated
     ICompletableFuture<SortedSet<QueryOneFourResult>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, TripRowQ4> keyValueSource) {
         return jobTracker.newJob(keyValueSource)
                 .mapper(new DelayPerBoroughZoneMapper())

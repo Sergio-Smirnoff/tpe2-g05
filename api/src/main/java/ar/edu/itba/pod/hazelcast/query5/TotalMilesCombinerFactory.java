@@ -4,6 +4,7 @@ import ar.edu.itba.pod.hazelcast.query5.objects.TotalMilesKey;
 import com.hazelcast.mapreduce.Combiner;
 import com.hazelcast.mapreduce.CombinerFactory;
 
+@Deprecated
 public class TotalMilesCombinerFactory implements CombinerFactory<TotalMilesKey, Double, Double> {
 
     @Override

@@ -4,7 +4,7 @@ import ar.edu.itba.pod.hazelcast.common.utility.Pair;
 import com.hazelcast.mapreduce.Combiner;
 import com.hazelcast.mapreduce.CombinerFactory;
 
-
+@Deprecated
 public class StartEndPairCombinerFactory implements CombinerFactory<Pair<String,String>, Long, Long> {
 
     @Override

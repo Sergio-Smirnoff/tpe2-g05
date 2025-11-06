@@ -4,7 +4,7 @@ import ar.edu.itba.pod.hazelcast.common.utility.Pair;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
 
-
+@Deprecated
 public class StartEndPairMapper implements Mapper<Integer, TripRowQ1, Pair<String, String>, Long> {
     private static final Long ONE = 1L;
     @Override
