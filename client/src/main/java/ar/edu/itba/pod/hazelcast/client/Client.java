@@ -20,9 +20,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -176,7 +174,18 @@ abstract class Client<T, K> {
 
         final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
         final int BATCH_SIZE = 10_000;
-        ExecutorService executorService = Executors.newFixedThreadPool(MAX_THREADS);
+        final int QUEUE_CAPACITY = MAX_THREADS * 2;
+
+        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+
+        ExecutorService executorService = new ThreadPoolExecutor(
+                MAX_THREADS,
+                MAX_THREADS,
+                0L, TimeUnit.MILLISECONDS,
+                workQueue,
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+
         final AtomicInteger tripsMapKey = new AtomicInteger();
 
         try (Stream<String> lines = Files.lines( Path.of(inPath).resolve(TRIPS_PATH), StandardCharsets.UTF_8)) {
@@ -239,6 +248,7 @@ abstract class Client<T, K> {
 
             }
             tripsMap.putAll(localTripsBatch);
+            logger.info("Lectura de batch finalizada. Se han cargado hasta "+ tripsMapKey.get() + " entradas.");
         }
     }
 
