@@ -6,6 +6,7 @@ import com.hazelcast.mapreduce.Collator;
 
 import java.util.*;
 
+@Deprecated
 public class QueryOneCollator implements Collator<Map.Entry<Pair<String, String>, Long>, SortedSet<QueryOneFourResult>> {
 
     @Override

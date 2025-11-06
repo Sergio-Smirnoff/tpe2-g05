@@ -97,7 +97,7 @@ abstract class Client<T, K> {
         }
     }
 
-
+    @Deprecated
     public void run(Predicate<? super String[]> filter, Function<String[], T> mapper){
         logger.info("Query-" + clientNumber + ": Cliente iniciando ...");
 
@@ -165,7 +165,8 @@ abstract class Client<T, K> {
             logger.log(Level.SEVERE,"Error durante la destrucción del mapa: {}", e.getLocalizedMessage());
         }
     }
-
+    
+    @Deprecated
     private KeyValueSource<Integer, T> loadTripsData(Predicate<? super String[]> filter, Function<String[], T> mapper) throws IOException {
         loadZonesData();
 

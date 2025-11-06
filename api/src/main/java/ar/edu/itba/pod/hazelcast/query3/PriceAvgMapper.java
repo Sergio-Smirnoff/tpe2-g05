@@ -3,6 +3,7 @@ package ar.edu.itba.pod.hazelcast.query3;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
 
+@Deprecated
 public class PriceAvgMapper implements Mapper<Integer, TripRowQ3, PickupCompanyPair, Double>{
 
     @Override

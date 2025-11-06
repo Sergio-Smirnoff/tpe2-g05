@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+@Deprecated
 public class Query3Collator implements Collator<Map.Entry<PickupCompanyPair, Double>, List<AvgPriceBoroughCompany>> {
     @Override
     public List<AvgPriceBoroughCompany> collate(Iterable<Map.Entry<PickupCompanyPair, Double>> values) {

@@ -1,15 +1,13 @@
 package ar.edu.itba.pod.hazelcast.query2;
 
-import ar.edu.itba.pod.hazelcast.common.ZonesRow;
-import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Collator;
 
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+@Deprecated
 public class LongestTripCollator implements Collator<Map.Entry<String, LongestTripValue>, SortedSet<LongestTripResult>> {
 
 

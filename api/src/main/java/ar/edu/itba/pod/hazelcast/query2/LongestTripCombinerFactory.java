@@ -3,6 +3,7 @@ package ar.edu.itba.pod.hazelcast.query2;
 import com.hazelcast.mapreduce.Combiner;
 import com.hazelcast.mapreduce.CombinerFactory;
 
+@Deprecated
 public class LongestTripCombinerFactory implements CombinerFactory<String, LongestTripValue, LongestTripValue> {
 
     @Override

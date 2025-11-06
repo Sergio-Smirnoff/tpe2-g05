@@ -4,6 +4,7 @@ package ar.edu.itba.pod.hazelcast.query2;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
+@Deprecated
 public class LongestTripReducerFactory implements ReducerFactory<String, LongestTripValue, LongestTripValue> {
 
     @Override

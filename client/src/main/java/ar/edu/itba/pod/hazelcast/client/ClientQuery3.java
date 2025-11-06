@@ -3,23 +3,11 @@ package ar.edu.itba.pod.hazelcast.client;
 
 import ar.edu.itba.pod.hazelcast.query3.*;
 import com.hazelcast.core.ICompletableFuture;
-import com.hazelcast.core.IMap;
-import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-import ar.edu.itba.pod.hazelcast.common.*;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class ClientQuery3 extends Client<TripRowQ3, AvgPriceBoroughCompany>{
     private static final Integer QUERY_NUMBER = 3;
@@ -30,6 +18,7 @@ public class ClientQuery3 extends Client<TripRowQ3, AvgPriceBoroughCompany>{
     }
 
     @Override
+    @Deprecated
     ICompletableFuture<List<AvgPriceBoroughCompany>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, TripRowQ3> keyValueSource) {
         return jobTracker.newJob(keyValueSource)
                 .mapper(new PriceAvgMapper())

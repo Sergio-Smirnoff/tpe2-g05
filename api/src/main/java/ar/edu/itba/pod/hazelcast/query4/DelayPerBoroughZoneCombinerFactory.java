@@ -5,6 +5,7 @@ import ar.edu.itba.pod.hazelcast.common.utility.Utils;
 import com.hazelcast.mapreduce.Combiner;
 import com.hazelcast.mapreduce.CombinerFactory;
 
+@Deprecated
 public class DelayPerBoroughZoneCombinerFactory implements CombinerFactory<String, Pair<String, Long>, Pair<String, Long>> {
 
     @Override

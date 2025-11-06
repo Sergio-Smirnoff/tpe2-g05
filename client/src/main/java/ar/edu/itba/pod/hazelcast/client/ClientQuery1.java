@@ -20,6 +20,7 @@ public class ClientQuery1 extends Client<TripRowQ1, QueryOneFourResult>{
     }
 
     @Override
+    @Deprecated
     ICompletableFuture<SortedSet<QueryOneFourResult>> executeMapReduce(JobTracker jobTracker, KeyValueSource<Integer, TripRowQ1> keyValueSource) {
         return jobTracker.newJob(keyValueSource)
                 .mapper(new StartEndPairMapper())

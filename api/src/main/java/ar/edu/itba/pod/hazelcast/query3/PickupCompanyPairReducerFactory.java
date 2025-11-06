@@ -3,6 +3,7 @@ package ar.edu.itba.pod.hazelcast.query3;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
+@Deprecated
 public class PickupCompanyPairReducerFactory implements ReducerFactory<PickupCompanyPair, Double, Double> {
 
     @Override
