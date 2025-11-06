@@ -13,10 +13,9 @@ ___
 
 ## Ejecución del Entorno
 
-1. Abrir la terminal en el directorio tpe2-go5.
+1. Abrir la terminal en el directorio tpe2-g05.
 2. Cambiar al directorio scripts 'cd scripts'
 3. Ejecutar 'sh ./build.sh' (El mismo compila el proyecto y descomprime los tar necesarios).
-
 
 ## Ejecución del Servidor
 
@@ -38,6 +37,8 @@ Donde:
 - DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
 - DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de salida
 
+(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
+
 ## Query 2
 
 Ejecutar el siguiente comando desde el directorio scripts/
@@ -50,6 +51,8 @@ Donde:
 - DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
 - DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de salida
 
+(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
+
 ## Query 3
 Ejecutar el siguiente comando desde el directorio scripts/
 
@@ -60,6 +63,8 @@ Donde:
 - yyyy : El puerto donde escucha el servidor.
 - DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
 - DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay los archivos de salida
+
+(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
 
 ## Query 4
 
@@ -74,6 +79,8 @@ Donde:
 - DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de salida
 - Dborough: Es el barrio de inicio de viaje
 
+(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
+
 ## Query 5
 
 Ejecutar el siguiente comando desde el directorio scripts/
@@ -85,3 +92,5 @@ Donde:
 - yyyy : El puerto donde escucha el servidor.
 - DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
 - DoutPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de salida
+
+(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
