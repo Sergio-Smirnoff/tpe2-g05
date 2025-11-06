@@ -8,7 +8,10 @@ if [ ! -d "../client/target/classes" ]; then
     exit 1
 fi
 
-cd client/target/tpe2-g05-client-2025.2Q
+CLIENT_DIR="../client/target/tpe2-g5-client-2025.2Q"
+
+chmod +x "$CLIENT_DIR/run-client.sh"
+cd "$CLIENT_DIR"
 ./run-client.sh $*
 cd -
 unset JAVA_RUN_CLASS

@@ -3,10 +3,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>ar.edu.itba.pod.hazelcast</groupId>
-  <artifactId>tpe2-g05-parent</artifactId>
+  <artifactId>tpe2-g5-parent</artifactId>
   <version>2025.2Q</version>
   <packaging>pom</packaging>
-  <name>tpe2-g05-parent</name>
+  <name>tpe2-g5-parent</name>
   <modules>
     <module>api</module>
     <module>server</module>

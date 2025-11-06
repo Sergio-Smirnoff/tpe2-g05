@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>tpe2-g05-parent</artifactId>
+    <artifactId>tpe2-g5-parent</artifactId>
     <groupId>ar.edu.itba.pod.hazelcast</groupId>
     <version>2025.2Q</version>
   </parent>
-  <artifactId>tpe2-g05-server</artifactId>
+  <artifactId>tpe2-g5-server</artifactId>
   <version>2025.2Q</version>
-  <name>tpe2-g05-server</name>
+  <name>tpe2-g5-server</name>
   <dependencies>
       <dependency>
           <groupId>com.hazelcast</groupId>

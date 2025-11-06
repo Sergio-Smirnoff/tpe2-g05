@@ -8,7 +8,7 @@ if [ ! -d "../client/target/classes" ]; then
     exit 1
 fi
 
-cd ../server/target/tpe2-g05-server-2025.2Q
+cd ../server/target/tpe2-g5-server-2025.2Q
 chmod +x ./run-server.sh
 
 for (( i=0; i<2; i++ ))
