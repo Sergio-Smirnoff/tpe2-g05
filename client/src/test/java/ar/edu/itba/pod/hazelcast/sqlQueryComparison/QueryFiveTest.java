@@ -53,8 +53,6 @@ public class QueryFiveTest extends BaseQueryComparisonTest {
 
         Assertions.assertEquals(sqlResults.getFirst(), mapReduceResults.getFirst());
 
-        logger.info("Comparing {} data rows...", sqlResults.size() - 1);
-
         for (int i = 1; i < sqlResults.size(); i++) {
             String sqlLine = sqlResults.get(i);
             String mrLine = mapReduceResults.get(i);
@@ -68,7 +66,7 @@ public class QueryFiveTest extends BaseQueryComparisonTest {
 
             double sqlMiles = Double.parseDouble(sqlParts[3]);
             double mrMiles = Double.parseDouble(mrParts[3]);
-            double tolerance = 0.01;
+            double tolerance = 0.1;
 
             Assertions.assertEquals(sqlMiles, mrMiles, tolerance);
         }

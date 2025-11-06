@@ -2,9 +2,6 @@ package ar.edu.itba.pod.hazelcast.sqlQueryComparison;
 
 import ar.edu.itba.pod.hazelcast.common.ZonesRow;
 import ar.edu.itba.pod.hazelcast.common.utility.QueryOneFourResult;
-import ar.edu.itba.pod.hazelcast.query1.StartEndPairCombinerFactory;
-import ar.edu.itba.pod.hazelcast.query1.StartEndPairMapper;
-import ar.edu.itba.pod.hazelcast.query1.StartEndPairReducerFactory;
 import ar.edu.itba.pod.hazelcast.query4.*;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;

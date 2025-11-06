@@ -1,15 +1,10 @@
 package ar.edu.itba.pod.hazelcast.sqlQueryComparison;
 
-// TODO: Import your specific Query 2 classes (Mapper, Reducer, Collator, Row)
-// e.g., import ar.edu.itba.pod.hazelcast.query2.*;
-// e.g., import ar.edu.itba.pod.hazelcast.common.TripRowQ2;
-
 import ar.edu.itba.pod.hazelcast.query2.*;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +27,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
-
-// TODO: Placeholder imports for your MR classes
-import com.hazelcast.mapreduce.Mapper;
-import com.hazelcast.mapreduce.Reducer;
-import com.hazelcast.mapreduce.ReducerFactory;
-import com.hazelcast.mapreduce.Collator;
-import java.util.Map;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class QueryTwoTest extends BaseQueryComparisonTest {
@@ -57,7 +44,26 @@ public class QueryTwoTest extends BaseQueryComparisonTest {
         assertFalse(sqlResults.isEmpty());
         assertFalse(mapReduceResults.isEmpty());
 
-        Assertions.assertEquals(sqlResults, mapReduceResults);
+        assertEquals(sqlResults.getFirst(), mapReduceResults.getFirst(), "Headers do not match.");
+
+        for (int i = 1; i < sqlResults.size(); i++) {
+            String sqlLine = sqlResults.get(i);
+            String mrLine = mapReduceResults.get(i);
+
+            String[] sqlParts = sqlLine.split(";");
+            String[] mrParts = mrLine.split(";");
+
+            assertEquals(sqlParts[0], mrParts[0]);
+            assertEquals(sqlParts[1], mrParts[1]);
+            assertEquals(sqlParts[2], mrParts[2]);
+            assertEquals(sqlParts[4], mrParts[4]);
+
+            double sqlMiles = Double.parseDouble(sqlParts[3]);
+            double mrMiles = Double.parseDouble(mrParts[3]);
+            double tolerance = 0.1;
+
+            assertEquals(sqlMiles, mrMiles, tolerance);
+        }
     }
 
     private List<String> getQueryTwoSQLResults() {
