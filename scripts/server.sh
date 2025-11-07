@@ -5,20 +5,11 @@ export JAVA_OPTS="-Xms3G -Xmx4G"
 
 NODE_COUNT=1
 
-
-while [[ $# -gt 0 ]]; do
-  key="$1"
-  case $key in
-    -n)
-      NODE_COUNT="$2"
-      shift
-      shift
-      ;;
-    *)
-      shift
-      ;;
-  esac
-done
+if [ "$1" = "-n" ]; then
+    NODE_COUNT="$2"
+    shift
+    shift
+fi
 
 if ! [[ "$NODE_COUNT" =~ ^[0-9]+$ ]]; then
   echo "Error: El valor para -n ('$NODE_COUNT') no es un válido" >&2

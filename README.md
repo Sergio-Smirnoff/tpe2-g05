@@ -15,82 +15,55 @@ ___
 
 1. Abrir la terminal en el directorio tpe2-g05.
 2. Cambiar al directorio scripts 'cd scripts'
-3. Ejecutar 'sh ./build.sh' (El mismo compila el proyecto y descomprime los tar necesarios).
+3. Ejecuta el script `build.sh` para compilar el código fuente. Este script también se encargará de descomprimir automáticamente los archivos `tar` necesarios.
+
+```bash
+  ./build.sh
+```
 
 ## Ejecución del Servidor
 
 Se ejecutará el servidor con la cantidad de nodos seleccionados.
 (Si no se aclara se ejecutara con uno solo)
 
-1. Ejecutar el servidor con 'sh ./server.sh -n X' siendo X la cantidad de nodos.
+1. Ejecutar el servidor con el script `server.sh` 
 
+```bash
+  ./server.sh -n X -Dinterface=yy.yy.yy.yy 
+```
 
-## Query 1
+| Parametro       | Descripcion                                                    | Default   |
+|:----------------|:---------------------------------------------------------------|:----------|
+| **-n**          | Cantidad de instancias del servidor que se desean ejecutar     | 1         |
+| **-Dinterface** | Interfaz de red para el 'bind' del servidor y armar el cluster | 127.0.0.1 | 
+Es importante que el `-n X` sea el primer argumento en caso de especificarlo
 
-Ejecutar el siguiente comando desde el directorio scripts/
+Ejemplo de Uso:
 
-"sh query1.sh -Daddresses='xx.xx.xx.xx:yyyy' -DinPath=. -DoutPath=."
+```bash
+  ./server.sh -n 2 -Dinterface='192.168.1.*'  
+```
 
-Donde:
-- xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
-- yyyy : El puerto donde escucha el servidor.
-- DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
+## Ejecucion de consultas
 
-(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
+Para ejecutar cualquiera de las queries, se utiliza el script principal con la siguiente sintaxis.
 
-## Query 2
+Sintaxis General:
 
-Ejecutar el siguiente comando desde el directorio scripts/
+```bash
+  sh queryX.sh -Daddresses='xx.xx.xx.xx:XXXX;yy.yy.yy.yy:YYYY' -DinPath=XX -DoutPath=YY [-Dborough=ZZ]
+```
 
-"sh query2.sh -Daddresses='xx.xx.xx.xx:yyyy' -DinPath=. -DoutPath=."
+| Parametro       | Descripcion                                                                                                 | 
+|:----------------|:------------------------------------------------------------------------------------------------------------|
+| **queryX.sh**   | Script de shell especifico para la Query X.                                                                 | 
+| **-Daddresses** | Direcciones IP y puertos de los nodos del cluster. Multiples nodos deben ir separados por punto y coma (;). | 
+| **-DinPath**    | Ruta del directorio que contiene los archivos de datos de entrada (viajes y zonas).                         | 
+| **-DoutPath**   | Ruta del directorio donde se generaran los archivos de salida: queryX.csv y timeX.txt.                      | 
+| **-Dborough**   | Parametro opcional para query4 (Nombre de la zona sobre el cual se ejecutará la query).                     | 
 
-Donde:
-- xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
-- yyyy : El puerto donde escucha el servidor.
-- DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
+Ejemplo de Uso:
 
-(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
-
-## Query 3
-Ejecutar el siguiente comando desde el directorio scripts/
-
-"sh query3.sh -Daddresses='xx.xx.xx.xx:yyyy' -DinPath=. -DoutPath=."
-
-Donde:
-- xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
-- yyyy : El puerto donde escucha el servidor.
-- DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
-
-(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
-
-## Query 4
-
-Ejecutar el siguiente comando desde el directorio scripts/
-
-"sh query4.sh -Daddresses='xx.xx.xx.xx:yyyy' -DinPath=. -DoutPath=. -Dborough= Z"
-
-Donde:
-- xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
-- yyyy : El puerto donde escucha el servidor.
-- DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
-- Dborough: Es el barrio de inicio de viaje
-
-(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
-
-## Query 5
-
-Ejecutar el siguiente comando desde el directorio scripts/
-
-"sh query1.sh -Daddresses='xx.xx.xx.xx:yyyy' -DinPath=. -DoutPath=."
-
-Donde:
-- xx.xx.xx.xx : La ip de la ubicación del servidor (Si es local colocar 127.0.0.1).
-- yyyy : El puerto donde escucha el servidor.
-- DinPath: Es el path relativo a la posicion del client/src/main/assembly/overlay de los archivos de entrada
-- DoutPath: Es el path relativo a la posicion del client/target/tpe2-g5-client-2025.2Q/ de los archivos de salida
-
-(Los archivos a ejecutar se deberan llamar "trips.csv" y "zones.csv")
+```bash
+  sh query1.sh -Daddresses='10.6.0.1:5701;10.6.0.2:5701' -DinPath=/afs/it.itba.edu.ar/pub/pod/ -DoutPath=/afs/it.itba.edu.ar/pub/pod-write/
+```
